@@ -1,0 +1,4 @@
+/vpp/*.bak*
+/vpp/*.lck*
+/vpp/*.lock*
+/vpp/.vpprefdata
