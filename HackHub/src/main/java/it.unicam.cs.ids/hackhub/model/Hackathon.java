@@ -15,8 +15,6 @@ public class Hackathon {
 
     private String name;
 
-
-
     private String description;
 
     private Date scandezaIscrizioni;
@@ -28,8 +26,6 @@ public class Hackathon {
     private Location location;
 
     private double premioInDenaro;
-
-    //giudice,mentori,teams
 
     @ManyToOne
     private Organizzatore organizzatore;
