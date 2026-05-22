@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 
 import jakarta.persistence.*;
@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-public class RichiestaSupport {
+public class RichiestaSupporto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,13 +18,13 @@ public class RichiestaSupport {
 
     private Date dataCall;
 
-    public RichiestaSupport(String descrizione, String linkCall, Date dataCall) {
+    public RichiestaSupporto(String descrizione, String linkCall, Date dataCall) {
         this.descrizione = descrizione;
         this.linkCall = linkCall;
         this.dataCall = dataCall;
     }
 
-    public RichiestaSupport() {
+    public RichiestaSupporto() {
     }
 
     public String getDescrizione() {

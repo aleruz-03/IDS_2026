@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 import jakarta.persistence.*;
 
@@ -21,6 +21,9 @@ public class Hackathon {
 
     private Date start;
     private Date end;
+
+    @Enumerated(EnumType.STRING)
+    private StatoHackathon stato;
 
     @Embedded
     private Location location;
@@ -105,4 +108,51 @@ public class Hackathon {
         this.premioInDenaro = premioInDenaro;
     }
 
+    public StatoHackathon getStato() {
+        return stato;
+    }
+
+    public void setStato(StatoHackathon stato) {
+        this.stato = stato;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Organizzatore getOrganizzatore() {
+        return organizzatore;
+    }
+
+    public void setOrganizzatore(Organizzatore organizzatore) {
+        this.organizzatore = organizzatore;
+    }
+
+    public Giudice getGiudice() {
+        return giudice;
+    }
+
+    public void setGiudice(Giudice giudice) {
+        this.giudice = giudice;
+    }
+
+    public List<Mentore> getMentori() {
+        return mentori;
+    }
+
+    public void setMentori(List<Mentore> mentori) {
+        this.mentori = mentori;
+    }
+
+    public List<Team> getTeams() {
+        return teams;
+    }
+
+    public void setTeams(List<Team> teams) {
+        this.teams = teams;
+    }
 }

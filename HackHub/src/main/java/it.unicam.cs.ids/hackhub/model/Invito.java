@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 import jakarta.persistence.*;
 
@@ -9,13 +9,13 @@ public class Invito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToMany
+    @ManyToOne
     private Team team;
 
-    @OneToMany
+    @ManyToOne
     private Utente mittente;
 
-    @OneToMany
+    @ManyToOne
     private Utente destinatario;
 
     public Invito(Team team, Utente mittente, Utente destinatario) {

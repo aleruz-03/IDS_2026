@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 import jakarta.persistence.*;
 
@@ -13,7 +13,7 @@ public class Team {
 
     private  String name;
 
-    @OneToMany
+    @ManyToMany
     private List<Utente> partecipanti;
 
     public Team(String name, List<Utente> partecipanti) {

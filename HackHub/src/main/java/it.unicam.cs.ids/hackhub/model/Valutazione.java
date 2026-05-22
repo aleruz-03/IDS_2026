@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 
 import jakarta.persistence.*;

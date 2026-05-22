@@ -1,4 +1,4 @@
-package com.example.hackhub.model;
+package it.unicam.cs.ids.hackhub.model;
 
 import jakarta.persistence.*;
 
@@ -11,8 +11,11 @@ public class Segnalazione {
 
     private String descrizione;
 
-    @OneToMany
+    @ManyToOne
     private Team team;
+
+    @ManyToOne
+    private Organizzatore organizzatore;
 
     public Segnalazione() {}
 
