@@ -1,0 +1,28 @@
+package it.unicam.cs.ids.hackhub.service;
+
+import it.unicam.cs.ids.hackhub.model.Utente;
+import it.unicam.cs.ids.hackhub.repository.UtenteRepository;
+import org.jspecify.annotations.Nullable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UtenteService {
+
+    private final UtenteRepository utenteRepository;
+
+    public UtenteService(UtenteRepository utenteRepository) {
+        this.utenteRepository = utenteRepository;
+    }
+
+
+    public Utente createUtente(Utente utente){
+        return utenteRepository.save(new Utente(utente.getNome(), utente.getCognome(), utente.getEmail(), utente.getPassword()));
+
+    }
+
+    public @Nullable List<Utente> getAllUtenti() {
+        return utenteRepository.findAll();
+    }
+}
