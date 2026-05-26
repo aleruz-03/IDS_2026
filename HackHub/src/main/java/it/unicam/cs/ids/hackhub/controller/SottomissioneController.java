@@ -1,12 +1,11 @@
 package it.unicam.cs.ids.hackhub.controller;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
 import it.unicam.cs.ids.hackhub.model.Sottomissione;
 import it.unicam.cs.ids.hackhub.service.SottomissioneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +25,18 @@ public class SottomissioneController {
         }
 
         return ResponseEntity.ok(sottomissioniList);
+    }
+
+    @PostMapping("/invia")
+    public ResponseEntity<Sottomissione> inviaSottomissione(@RequestBody SottomissioneDTO sottomissioneDTO){
+        Sottomissione nuovaSottomissione = sottomissioneService.createSottomissione(sottomissioneDTO);
+
+        return ResponseEntity.ok(nuovaSottomissione);
+    }
+
+    @PutMapping("/aggiorna/{idSottomissione}")
+    public ResponseEntity<Sottomissione> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO){
+        Sottomissione sottomissioneAggiornata = sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
+        return ResponseEntity.ok(sottomissioneAggiornata);
     }
 }

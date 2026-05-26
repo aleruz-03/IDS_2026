@@ -19,8 +19,8 @@ public class Hackathon {
 
     private Date scandezaIscrizioni;
 
-    private Date start;
-    private Date end;
+    private Date data_start;
+    private Date data_end;
 
     @Enumerated(EnumType.STRING)
     private StatoHackathon stato;
@@ -43,21 +43,25 @@ public class Hackathon {
     private List<Team> teams;
 
 
-    public Hackathon(String name, String description, Date scandezaIscrizioni, Date start, Date end, Location location, double premioInDenaro, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori, List<Team> teams) {
+    public Hackathon(String name, String description, Date scandezaIscrizioni, Date data_start, Date data_end, Location location, double premioInDenaro, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori) {
         this.name = name;
         this.description = description;
         this.scandezaIscrizioni = scandezaIscrizioni;
-        this.start = start;
-        this.end = end;
+        this.data_start = data_start;
+        this.data_end = data_end;
         this.location = location;
         this.premioInDenaro = premioInDenaro;
         this.organizzatore = organizzatore;
         this.giudice = giudice;
         this.mentori = mentori;
-        this.teams = teams;
+        this.stato = StatoHackathon.ISCRIZIONE;
     }
 
     public Hackathon() {
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -84,20 +88,20 @@ public class Hackathon {
         this.scandezaIscrizioni = scandezaIscrizioni;
     }
 
-    public Date getStart() {
-        return start;
+    public Date getData_Start() {
+        return data_start;
     }
 
-    public void setStart(Date start) {
-        this.start = start;
+    public void setData_Start(Date start) {
+        this.data_start = start;
     }
 
-    public Date getEnd() {
-        return end;
+    public Date getData_End() {
+        return data_end;
     }
 
     public void setEnd(Date end) {
-        this.end = end;
+        this.data_end = end;
     }
 
     public double getPremioInDenaro() {

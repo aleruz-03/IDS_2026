@@ -22,7 +22,7 @@ public class UtenteService {
 
     }
 
-    public @Nullable List<Utente> getAllUtenti() {
+    public List<Utente> getAllUtenti() {
         return utenteRepository.findAll();
     }
 }

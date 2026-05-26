@@ -2,6 +2,7 @@ package it.unicam.cs.ids.hackhub.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,9 +17,12 @@ public class Team {
     @ManyToMany
     private List<Utente> partecipanti;
 
+    @ManyToMany
+    private List<Hackathon> hackathon;
+
     public Team(String name) {
         this.name = name;
-
+        this.hackathon = new ArrayList<>();
     }
 
     public Team() {
@@ -43,5 +47,13 @@ public class Team {
 
     public void setPartecipanti(List<Utente> partecipanti) {
         this.partecipanti = partecipanti;
+    }
+
+    public List<Hackathon> getHackathon() {
+        return hackathon;
+    }
+
+    public void setHackathon(List<Hackathon> hackathon) {
+        this.hackathon = hackathon;
     }
 }

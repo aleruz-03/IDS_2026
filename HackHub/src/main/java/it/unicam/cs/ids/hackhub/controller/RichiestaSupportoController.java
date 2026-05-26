@@ -27,8 +27,8 @@ public class RichiestaSupportoController {
         }
     }
 
-    @PostMapping("/crea")
-    public ResponseEntity<RichiestaSupporto> creaRichiesta(@RequestParam Long idTeam, @RequestParam String descrizione){
+    @PostMapping("/crea/{idTeam}")
+    public ResponseEntity<RichiestaSupporto> creaRichiesta(@PathVariable Long idTeam, @RequestParam String descrizione){
         RichiestaSupporto richiesta = richiestaSupportoService.creaRichiestaSupporto(idTeam, descrizione);
         return ResponseEntity.status(HttpStatus.CREATED).body(richiesta);
     }

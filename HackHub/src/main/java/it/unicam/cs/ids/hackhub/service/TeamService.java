@@ -1,7 +1,11 @@
 package it.unicam.cs.ids.hackhub.service;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
+import it.unicam.cs.ids.hackhub.model.Hackathon;
+import it.unicam.cs.ids.hackhub.model.StatoHackathon;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.model.Utente;
+import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.repository.TeamRepository;
 import it.unicam.cs.ids.hackhub.repository.UtenteRepository;
 import org.jspecify.annotations.Nullable;
@@ -14,9 +18,12 @@ import java.util.List;
 public class TeamService {
     private final TeamRepository teamRepository;
     private final UtenteRepository utenteRepository;
-    public TeamService(TeamRepository teamRepository, UtenteRepository utenteRepository) {
+    private final HackathonRepository hackathonRepository;
+
+    public TeamService(TeamRepository teamRepository, UtenteRepository utenteRepository, HackathonRepository hackathonRepository) {
         this.teamRepository = teamRepository;
         this.utenteRepository = utenteRepository;
+        this.hackathonRepository = hackathonRepository;
     }
 
 
@@ -30,5 +37,24 @@ public class TeamService {
 
     public  List<Team> getAllTeams() {
         return teamRepository.findAll();
+    }
+
+
+    public Hackathon iscriviTeam(Long idUtente, Long idTeam, Long idHackathon){
+        Utente utente = utenteRepository.getUtenteById(idUtente);
+        Team team = teamRepository.getTeamById(idTeam);
+        Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+
+        if(hackathon.getStato() != StatoHackathon.ISCRIZIONE){
+            return null;
+        }
+
+        if(!team.getPartecipanti().contains(utente)){return null;}
+
+        hackathon.getTeams().add(team);
+        team.getHackathon().add(hackathon);
+        
+        return hackathonRepository.save(hackathon);
+
     }
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InvitoRepository extends JpaRepository<Invito, Long> {
-    Invito deleteInvitoById(Long id);
 
     Invito getInvitoById(Long idInvito);
 }

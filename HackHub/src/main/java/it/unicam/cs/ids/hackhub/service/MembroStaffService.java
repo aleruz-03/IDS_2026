@@ -1,5 +1,6 @@
 package it.unicam.cs.ids.hackhub.service;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.CreazioneMembroStaffDTO;
 import it.unicam.cs.ids.hackhub.model.Giudice;
 import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.Organizzatore;
@@ -18,16 +19,37 @@ public class MembroStaffService {
     }
 
 
-    public Organizzatore createOrganizzatore(Organizzatore organizzatore) {
-        return membroStaffRepository.save(new Organizzatore(organizzatore.getNome(), organizzatore.getCognome(), organizzatore.getEmail(), organizzatore.getPassword()));
+    public Organizzatore createOrganizzatore(CreazioneMembroStaffDTO organizzatoreDTO) {
+        Organizzatore organizzatore = new Organizzatore(
+                organizzatoreDTO.nome(),
+                organizzatoreDTO.cognome(),
+                organizzatoreDTO.email(),
+                organizzatoreDTO.password()
+        );
+
+        return membroStaffRepository.save(organizzatore);
     }
 
-    public Mentore createMentore(Mentore mentore){
-        return membroStaffRepository.save(new Mentore(mentore.getNome(), mentore.getCognome(), mentore.getEmail(), mentore.getPassword()));
+    public Mentore createMentore(CreazioneMembroStaffDTO mentoreDTO){
+        Mentore mentore = new Mentore(
+                mentoreDTO.nome(),
+                mentoreDTO.cognome(),
+                mentoreDTO.email(),
+                mentoreDTO.password()
+        );
+
+        return membroStaffRepository.save(mentore);
     }
 
-    public Giudice createGiudice(Giudice giudice){
-        return  membroStaffRepository.save(new Giudice(giudice.getNome(), giudice.getCognome(), giudice.getEmail(), giudice.getPassword()));
+    public Giudice createGiudice(CreazioneMembroStaffDTO giudiceDTO){
+        Giudice giudice = new Giudice(
+                giudiceDTO.nome(),
+                giudiceDTO.cognome(),
+                giudiceDTO.email(),
+                giudiceDTO.password()
+        );
+
+        return membroStaffRepository.save(giudice);
     }
 
 

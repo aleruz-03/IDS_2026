@@ -10,5 +10,5 @@ import java.util.List;
 public interface SegnalazioneRepository extends JpaRepository<Segnalazione, Long> {
     List<Segnalazione> findByOrganizzatoreId(Long organizzatoreId);
 
-    List<Segnalazione> findByMentoreId(Long mentoreID);
+    List<Segnalazione> findByMentoreId(Long mentoreId);
 }

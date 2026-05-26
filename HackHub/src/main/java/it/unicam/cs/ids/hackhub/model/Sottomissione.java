@@ -15,13 +15,27 @@ public class Sottomissione {
     private String url;
     private String descrizione;
 
-    public Sottomissione(Date dataCaricamento, String url, String descrizione) {
+    @ManyToOne
+    @JoinColumn(name="team_id")
+    private Team team;
+
+    @ManyToOne
+    @JoinColumn(name="hackathon_id")
+    private Hackathon hackathon;
+
+    public Sottomissione(Date dataCaricamento, String url, String descrizione,  Team team, Hackathon hackathon) {
         this.dataCaricamento = dataCaricamento;
         this.url = url;
         this.descrizione = descrizione;
+        this.team = team;
+        this.hackathon = hackathon;
     }
 
     public Sottomissione() {
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Date getDataCaricamento() {
@@ -46,5 +60,21 @@ public class Sottomissione {
 
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Hackathon getHackathon() {
+        return hackathon;
+    }
+
+    public void setHackathon(Hackathon hackathon) {
+        this.hackathon = hackathon;
     }
 }

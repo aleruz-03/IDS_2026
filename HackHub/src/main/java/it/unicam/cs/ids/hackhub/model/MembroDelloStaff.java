@@ -38,6 +38,12 @@ public class MembroDelloStaff {
         this.password = password;
     }
 
+    public Long  getId() {
+        return id;
+    }
+
+    public void setId(Long id) {}
+
     public String getNome() {
         return nome;
     }

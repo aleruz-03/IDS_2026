@@ -1,6 +1,6 @@
 package it.unicam.cs.ids.hackhub.controller;
 
-
+import it.unicam.cs.ids.hackhub.controller.DTO.CreazioneMembroStaffDTO;
 import it.unicam.cs.ids.hackhub.model.Giudice;
 import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.Organizzatore;
@@ -21,19 +21,19 @@ public class MembroStaffController {
     public MembroStaffController(MembroStaffService membroStaffService) {this.membroStaffService = membroStaffService;}
 
     @PostMapping("/organizzatore")
-    public ResponseEntity<Organizzatore> createOrganizzatore(@RequestBody Organizzatore organizzatore) {
-        return ResponseEntity.ok(membroStaffService.createOrganizzatore(organizzatore));
+    public ResponseEntity<Organizzatore> createOrganizzatore(@RequestBody CreazioneMembroStaffDTO organizzatoreDTO) {
+        return ResponseEntity.ok(membroStaffService.createOrganizzatore(organizzatoreDTO));
     }
 
 
     @PostMapping("/mentore")
-    public ResponseEntity<Mentore> createMentore(@RequestBody Mentore mentore) {
-        return ResponseEntity.ok(membroStaffService.createMentore(mentore));
+    public ResponseEntity<Mentore> createMentore(@RequestBody CreazioneMembroStaffDTO mentoreDTO) {
+        return ResponseEntity.ok(membroStaffService.createMentore(mentoreDTO));
     }
 
     @PostMapping("/giudice")
-    public ResponseEntity<Giudice> createGiudice(@RequestBody Giudice giudice) {
-        return ResponseEntity.ok(membroStaffService.createGiudice(giudice));
+    public ResponseEntity<Giudice> createGiudice(@RequestBody CreazioneMembroStaffDTO giudiceDTO) {
+        return ResponseEntity.ok(membroStaffService.createGiudice(giudiceDTO));
     }
 
 

@@ -6,7 +6,6 @@ import it.unicam.cs.ids.hackhub.model.Utente;
 import it.unicam.cs.ids.hackhub.repository.InvitoRepository;
 import it.unicam.cs.ids.hackhub.repository.TeamRepository;
 import it.unicam.cs.ids.hackhub.repository.UtenteRepository;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

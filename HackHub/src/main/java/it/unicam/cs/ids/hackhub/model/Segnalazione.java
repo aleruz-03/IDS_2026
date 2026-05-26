@@ -29,6 +29,8 @@ public class Segnalazione {
         this.mentore = mentore;
     }
 
+    public Long getId() {return id;}
+
     public String getDescrizione() {
         return descrizione;
     }
@@ -41,23 +43,11 @@ public class Segnalazione {
         return team;
     }
 
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
     public Organizzatore getOrganizzatore() {
         return organizzatore;
     }
 
-    public void setOrganizzatore(Organizzatore organizzatore) {
-        this.organizzatore = organizzatore;
-    }
-
     public Mentore getMentore() {
         return mentore;
-    }
-
-    public void setMentore(Mentore mentore) {
-        this.mentore = mentore;
     }
 }

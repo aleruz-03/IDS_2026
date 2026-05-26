@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface HackathonRepository extends JpaRepository<Hackathon, Long> {
+    Hackathon getHackathonById(Long idHackathon);
 }

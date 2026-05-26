@@ -1,5 +1,8 @@
 package it.unicam.cs.ids.hackhub.controller;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.IscrizioneDTO;
+import it.unicam.cs.ids.hackhub.model.Hackathon;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,13 @@ public class TeamController {
     @GetMapping("/teams")
     public ResponseEntity<List<Team>> getAllTeams(){
         return ResponseEntity.ok(teamService.getAllTeams());
+    }
+
+
+    @PostMapping("/iscrizione/{idUtente}")
+    public ResponseEntity<HackathonResponseDTO> iscriviTeam(@PathVariable Long idUtente, @RequestBody IscrizioneDTO iscrizioneDTO){
+        Hackathon hackathon = teamService.iscriviTeam(idUtente, iscrizioneDTO.idTeam(), iscrizioneDTO.idHackathon());
+        return ResponseEntity.ok(HackathonResponseDTO.fromHackathon(hackathon));
     }
 
 
