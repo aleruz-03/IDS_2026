@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SottomissioneRepository extends JpaRepository<Sottomissione, Long> {
+    Sottomissione getSottomissioneById(long id);
 }

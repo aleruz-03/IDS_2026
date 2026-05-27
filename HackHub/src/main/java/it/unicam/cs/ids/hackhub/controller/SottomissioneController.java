@@ -1,7 +1,9 @@
 package it.unicam.cs.ids.hackhub.controller;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.ValutazioneDTO;
 import it.unicam.cs.ids.hackhub.model.Sottomissione;
+import it.unicam.cs.ids.hackhub.model.Valutazione;
 import it.unicam.cs.ids.hackhub.service.SottomissioneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,5 +40,10 @@ public class SottomissioneController {
     public ResponseEntity<Sottomissione> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO){
         Sottomissione sottomissioneAggiornata = sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
         return ResponseEntity.ok(sottomissioneAggiornata);
+    }
+
+    @PostMapping("/valuta/{idGiudice}")
+    public ResponseEntity<Valutazione> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO){
+        return ResponseEntity.ok(sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO));
     }
 }

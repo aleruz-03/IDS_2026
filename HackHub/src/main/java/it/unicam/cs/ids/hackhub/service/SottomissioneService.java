@@ -1,12 +1,9 @@
 package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
-import it.unicam.cs.ids.hackhub.model.Hackathon;
-import it.unicam.cs.ids.hackhub.model.Sottomissione;
-import it.unicam.cs.ids.hackhub.model.Team;
-import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
-import it.unicam.cs.ids.hackhub.repository.SottomissioneRepository;
-import it.unicam.cs.ids.hackhub.repository.TeamRepository;
+import it.unicam.cs.ids.hackhub.controller.DTO.ValutazioneDTO;
+import it.unicam.cs.ids.hackhub.model.*;
+import it.unicam.cs.ids.hackhub.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +16,11 @@ public class SottomissioneService {
 
     @Autowired
     private SottomissioneRepository sottomissioneRepository;
-
-    @Autowired
     private TeamRepository teamRepository;
-
-    @Autowired
     private HackathonRepository hackathonRepository;
+    private ValutazioneRepository valutazioneRepository;
+    private MembroStaffRepository membroStaffRepository;
+
 
     public List<Sottomissione> getAllSottomissione(){
         return sottomissioneRepository.findAll();
@@ -38,8 +34,6 @@ public class SottomissioneService {
         Hackathon hackathon = hackathonRepository.findById(sottomissioneDTO.idHackathon())
                 .orElseThrow(() -> new RuntimeException("Hackathon non trovato con ID: " +  sottomissioneDTO.idHackathon()));
 
-        checkInvio(hackathon);
-
         Sottomissione sottomissione = new Sottomissione(
                 new Date(),
                 sottomissioneDTO.url(),
@@ -48,33 +42,47 @@ public class SottomissioneService {
                 hackathon
         );
 
+        hackathon.aggiungiSottomissione(sottomissione);
+
         return sottomissioneRepository.save(sottomissione);
     }
 
     @Transactional
-    public Sottomissione aggiornaSottomissione(Long idSottomissione, SottomissioneDTO sottomissioneDTO){
+    public Sottomissione aggiornaSottomissione(Long idSottomissione, SottomissioneDTO dto){
         Sottomissione sottomissione = sottomissioneRepository.findById(idSottomissione)
                 .orElseThrow(() -> new RuntimeException("Sottomissione non trovata con ID: " + idSottomissione));
 
         Hackathon hackathon = sottomissione.getHackathon();
 
-        checkInvio(hackathon);
-
-        sottomissione.setUrl(sottomissioneDTO.url());
-        sottomissione.setDescrizione(sottomissioneDTO.descrizione());
+        sottomissione.setUrl(dto.url() != null ? dto.url() : sottomissione.getUrl());
+        sottomissione.setDescrizione(dto.descrizione() != null ? dto.descrizione() : sottomissione.getDescrizione());
         sottomissione.setDataCaricamento(new Date());
+
+        hackathon.aggiornaSottomissione(sottomissione);
 
         return sottomissioneRepository.save(sottomissione);
     }
 
-    private void checkInvio(Hackathon hackathon){
-        Date dataAttuale = new Date();
-        if (hackathon.getData_Start() != null && dataAttuale.before(hackathon.getData_Start())){
-            throw new RuntimeException("Impossibile completare l'operazione: l'Hackathon non è ancora iniziato!");
+    public Valutazione valutaSottomissione(Long idGiudice, ValutazioneDTO valutazioneDTO) {
+        Sottomissione sottomissione = sottomissioneRepository.findById(valutazioneDTO.idSottomissione())
+                .orElseThrow(() -> new RuntimeException("Sottomissione non trovata"));
+
+        Hackathon hackathon = sottomissione.getHackathon();
+
+        if (!hackathon.getGiudice().getId().equals(idGiudice)) {
+            throw new RuntimeException("Giudice non assegnato all'Hackathon corrispondente alla sottomissione");
         }
 
-        if (hackathon.getData_End() != null && dataAttuale.after(hackathon.getData_End())){
-            throw new RuntimeException("Impossibile completare l'operazione: il tempo a disposizione per questo Hackathon è scaduto!");
-        }
+        hackathon.valutaSottomissione();
+
+        Giudice giudice = membroStaffRepository.getGiudiceById(idGiudice);
+
+        Valutazione valutazione = new Valutazione(valutazioneDTO.voto(), valutazioneDTO.descrizione());
+        valutazione.setSottomissione(sottomissione);
+        valutazione.setGiudice(giudice);
+
+
+        return valutazioneRepository.save(valutazione);
     }
+
 }

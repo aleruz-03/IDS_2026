@@ -45,13 +45,16 @@ public class TeamService {
         Team team = teamRepository.getTeamById(idTeam);
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
 
-        if(hackathon.getStato() != StatoHackathon.ISCRIZIONE){
-            return null;
+        if(!team.getPartecipanti().contains(utente)){
+            throw new RuntimeException("Operazione non consentita: non fai parte di questo team!");
         }
 
-        if(!team.getPartecipanti().contains(utente)){return null;}
+        hackathon.iscriviTeam(team);
 
-        hackathon.getTeams().add(team);
+        if(!team.getHackathon().contains(hackathon)){
+            team.getHackathon().add(hackathon);
+        }
+
         team.getHackathon().add(hackathon);
         
         return hackathonRepository.save(hackathon);

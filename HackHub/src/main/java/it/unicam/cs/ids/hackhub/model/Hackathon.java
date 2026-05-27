@@ -1,5 +1,6 @@
 package it.unicam.cs.ids.hackhub.model;
 
+import it.unicam.cs.ids.hackhub.model.state.*;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -11,7 +12,7 @@ public class Hackathon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     private String name;
 
@@ -23,7 +24,10 @@ public class Hackathon {
     private Date data_end;
 
     @Enumerated(EnumType.STRING)
-    private StatoHackathon stato;
+    private StatoHackathon statoRiferimento;
+
+    @Transient
+    private StateHackathon statoAttuale;
 
     @Embedded
     private Location location;
@@ -42,6 +46,17 @@ public class Hackathon {
     @ManyToMany
     private List<Team> teams;
 
+    @PostLoad
+    public void inizializzaStatoClasse() {
+        if (this.statoRiferimento == null) this.statoRiferimento = StatoHackathon.ISCRIZIONE;
+        switch (this.statoRiferimento) {
+            case ISCRIZIONE -> this.statoAttuale = new InIscrizione();
+            case IN_CORSO -> this.statoAttuale = new InCorso();
+            case IN_VALUTAZIONE -> this.statoAttuale = new InValutazione();
+            case CONCLUSO -> this.statoAttuale = new Concluso();
+        }
+    }
+
 
     public Hackathon(String name, String description, Date scandezaIscrizioni, Date data_start, Date data_end, Location location, double premioInDenaro, Organizzatore organizzatore, Giudice giudice, List<Mentore> mentori) {
         this.name = name;
@@ -54,7 +69,8 @@ public class Hackathon {
         this.organizzatore = organizzatore;
         this.giudice = giudice;
         this.mentori = mentori;
-        this.stato = StatoHackathon.ISCRIZIONE;
+        this.statoRiferimento = StatoHackathon.ISCRIZIONE;
+        this.statoAttuale = new InIscrizione();
     }
 
     public Hackathon() {
@@ -113,11 +129,12 @@ public class Hackathon {
     }
 
     public StatoHackathon getStato() {
-        return stato;
+        return this.statoRiferimento;
     }
 
     public void setStato(StatoHackathon stato) {
-        this.stato = stato;
+        this.statoRiferimento = stato;
+        inizializzaStatoClasse();
     }
 
     public Location getLocation() {
@@ -158,5 +175,34 @@ public class Hackathon {
 
     public void setTeams(List<Team> teams) {
         this.teams = teams;
+    }
+
+    public void cambiaStato(StateHackathon nuovoStato){
+        this.statoAttuale = nuovoStato;
+
+        if (nuovoStato instanceof InIscrizione) this.statoRiferimento = StatoHackathon.ISCRIZIONE;
+        else if (nuovoStato instanceof InCorso) this.statoRiferimento = StatoHackathon.IN_CORSO;
+        else if (nuovoStato instanceof InValutazione) this.statoRiferimento = StatoHackathon.IN_VALUTAZIONE;
+        else if (nuovoStato instanceof Concluso) this.statoRiferimento = StatoHackathon.CONCLUSO;
+    }
+
+    public void iscriviTeam(Team team){
+        if (this.statoAttuale == null) inizializzaStatoClasse();
+        this.statoAttuale.registraTeam(this, team);
+    }
+
+    public void aggiungiSottomissione(Sottomissione sottomissione) {
+        if (this.statoAttuale == null) inizializzaStatoClasse();
+        this.statoAttuale.aggiungiSottomissione(this, sottomissione);
+    }
+
+    public void aggiornaSottomissione(Sottomissione sottomissione) {
+        if (this.statoAttuale == null) inizializzaStatoClasse();
+        this.statoAttuale.aggiornaSottomissione(this, sottomissione);
+    }
+
+    public void valutaSottomissione() {
+        if (this.statoAttuale == null) inizializzaStatoClasse();
+        this.statoAttuale.valutaSottomissione(this);
     }
 }

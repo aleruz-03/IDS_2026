@@ -15,12 +15,13 @@
 - modifica segnalazione
 - elimina segnalazione
 - iscrive team
-
-### da testare
 - aggiungi mentore
+- modifica hackathon
 - invia sottomissione
 - modifica sottomissione
-- modifica hackathon
+- valuta sottomissione
+
+### da testare
  
 ### in corso
 

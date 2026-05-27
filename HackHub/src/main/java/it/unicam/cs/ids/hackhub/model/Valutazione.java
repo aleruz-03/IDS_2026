@@ -11,8 +11,13 @@ public class Valutazione {
 
     private int voto;
 
-
     private String descrizione;
+
+    @OneToOne
+    private Sottomissione sottomissione;
+
+    @ManyToOne
+    private Giudice giudice;
 
     public Valutazione(int voto, String descrizione) {
         this.voto = voto;
@@ -36,5 +41,21 @@ public class Valutazione {
 
     public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
+    }
+
+    public Giudice getGiudice() {
+        return giudice;
+    }
+
+    public void setGiudice(Giudice giudice) {
+        this.giudice = giudice;
+    }
+
+    public Sottomissione getSottomissione() {
+        return sottomissione;
+    }
+
+    public void setSottomissione(Sottomissione sottomissione) {
+        this.sottomissione = sottomissione;
     }
 }

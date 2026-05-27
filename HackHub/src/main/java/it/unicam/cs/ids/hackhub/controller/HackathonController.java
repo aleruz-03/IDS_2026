@@ -5,6 +5,8 @@ import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ModificaHackathonDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.creazioneHackathonDTO;
 import it.unicam.cs.ids.hackhub.model.Hackathon;
+import it.unicam.cs.ids.hackhub.model.StatoHackathon;
+import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.service.HackathonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ public class HackathonController {
 
     @Autowired
     private HackathonService hackathonService;
+    private HackathonRepository hr;
 
     @GetMapping
     public ResponseEntity<List<HackathonResponseDTO>> visualizzaHackathon(){
@@ -48,12 +51,17 @@ public class HackathonController {
     }
 
     @PutMapping("/organizzatore/{idOrganizzatore}/modifica/{idHackathon}")
-    public ResponseEntity<HackathonResponseDTO> modificaHackathon(
-            @PathVariable Long idOrganizzatore,
-            @PathVariable Long idHackathon,
-            @RequestBody ModificaHackathonDTO dto
-            ){
+    public ResponseEntity<HackathonResponseDTO> modificaHackathon(@PathVariable Long idOrganizzatore,@PathVariable Long idHackathon,@RequestBody ModificaHackathonDTO dto){
         Hackathon hackathonAggiornato = hackathonService.modificaHackathon(idOrganizzatore,idHackathon,dto);
         return ResponseEntity.ok(HackathonResponseDTO.fromHackathon(hackathonAggiornato));
+    }
+
+    //test nel body "NOME_STATO"
+    @PutMapping("/stato/{idHackathon}")
+    public ResponseEntity<Hackathon> cambiaStato(@PathVariable Long idHackathon, @RequestBody StatoHackathon stato){
+        Hackathon hack = hr.getHackathonById(idHackathon);
+        hack.setStato(stato);
+        hr.save(hack);
+        return ResponseEntity.ok(hack);
     }
 }
