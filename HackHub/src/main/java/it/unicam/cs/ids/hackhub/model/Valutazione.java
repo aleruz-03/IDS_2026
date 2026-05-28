@@ -27,6 +27,10 @@ public class Valutazione {
     public Valutazione() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public int getVoto() {
         return voto;
     }

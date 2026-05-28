@@ -23,6 +23,9 @@ public class Sottomissione {
     @JoinColumn(name="hackathon_id")
     private Hackathon hackathon;
 
+    @OneToOne
+    private Valutazione valutazione;
+
     public Sottomissione(Date dataCaricamento, String url, String descrizione,  Team team, Hackathon hackathon) {
         this.dataCaricamento = dataCaricamento;
         this.url = url;
@@ -76,5 +79,13 @@ public class Sottomissione {
 
     public void setHackathon(Hackathon hackathon) {
         this.hackathon = hackathon;
+    }
+
+    public Valutazione getValutazione() {
+        return valutazione;
+    }
+
+    public void setValutazione(Valutazione valutazione) {
+        this.valutazione = valutazione;
     }
 }

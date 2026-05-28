@@ -46,6 +46,10 @@ public class Hackathon {
     @ManyToMany
     private List<Team> teams;
 
+
+    @OneToOne
+    private Team teamVincitore;
+
     @PostLoad
     public void inizializzaStatoClasse() {
         if (this.statoRiferimento == null) this.statoRiferimento = StatoHackathon.ISCRIZIONE;
@@ -175,6 +179,14 @@ public class Hackathon {
 
     public void setTeams(List<Team> teams) {
         this.teams = teams;
+    }
+
+    public Team getTeamVincitore() {
+        return teamVincitore;
+    }
+
+    public void setTeamVincitore(Team teamVincitore) {
+        this.teamVincitore = teamVincitore;
     }
 
     public void cambiaStato(StateHackathon nuovoStato){

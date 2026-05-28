@@ -3,13 +3,11 @@ package it.unicam.cs.ids.hackhub.service;
 import it.unicam.cs.ids.hackhub.controller.DTO.AggiungiMentoreDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ModificaHackathonDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.creazioneHackathonDTO;
-import it.unicam.cs.ids.hackhub.model.Giudice;
-import it.unicam.cs.ids.hackhub.model.Hackathon;
-import it.unicam.cs.ids.hackhub.model.MembroDelloStaff;
-import it.unicam.cs.ids.hackhub.model.Mentore;
-import it.unicam.cs.ids.hackhub.model.Organizzatore;
+import it.unicam.cs.ids.hackhub.model.*;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.repository.MembroStaffRepository;
+import it.unicam.cs.ids.hackhub.repository.TeamRepository;
+import it.unicam.cs.ids.hackhub.service.adapter.SistemaPagamentoAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +16,18 @@ import java.util.List;
 @Service
 public class HackathonService {
 
-    @Autowired
-    private HackathonRepository hackathonRepository;
-    private MembroStaffRepository membroStaffRepository;
 
-    public HackathonService(HackathonRepository hackathonRepository, MembroStaffRepository membroStaffRepository) {
+    private final HackathonRepository hackathonRepository;
+    private final MembroStaffRepository membroStaffRepository;
+    private final TeamRepository teamRepository;
+    private final SistemaPagamentoAdapter sistemaPagamentoAdapter;
+
+    @Autowired
+    public HackathonService(HackathonRepository hackathonRepository, MembroStaffRepository membroStaffRepository, TeamRepository teamRepository, SistemaPagamentoAdapter sistemaPagamentoAdapter) {
         this.hackathonRepository = hackathonRepository;
         this.membroStaffRepository = membroStaffRepository;
+        this.teamRepository = teamRepository;
+        this.sistemaPagamentoAdapter = sistemaPagamentoAdapter;
     }
 
     public List<Hackathon> getAllHackathons(){
@@ -108,4 +111,47 @@ public class HackathonService {
 
         return hackathonRepository.save(hackathon);
     }
+
+
+    public Hackathon proclamaVincitore(Long idOrganizzatore, Long idTeam, Long idHackathon){
+        Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        Team team = teamRepository.getTeamById(idTeam);
+
+        if(!hackathon.getOrganizzatore().getId().equals(idOrganizzatore)){
+            throw new RuntimeException("Non è l'organizzatore dell'hackathon selezionato");
+        }
+
+        if(hackathon.getStato() != StatoHackathon.IN_VALUTAZIONE){
+            throw  new  RuntimeException("Hackathon non in fase di valutazione");
+        }
+        if(!hackathon.getTeams().contains(team)){
+            throw  new  RuntimeException("Team non iscritto all'hackathon selezionato");
+        }
+
+        if(!checkSottomissioniValutate(hackathon)){
+            throw new RuntimeException("Non tutte le sottomissioni sono state valuate dal giudice");
+        }
+
+        boolean pagamentoRiuscito = sistemaPagamentoAdapter.erogaPremio(hackathon,team);
+
+        if (!pagamentoRiuscito) {
+            throw new RuntimeException("Errore durante l'erogazione del premio");
+        }
+
+        hackathon.setTeamVincitore(team);
+        return hackathonRepository.save(hackathon);
+
+    }
+
+
+    private Boolean checkSottomissioniValutate(Hackathon hackathon){
+        for(Team team  : hackathon.getTeams()){
+            if(team.getSottomissione().getValutazione() == null){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }

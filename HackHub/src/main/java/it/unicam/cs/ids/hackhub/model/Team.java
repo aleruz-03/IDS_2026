@@ -20,6 +20,11 @@ public class Team {
     @ManyToMany
     private List<Hackathon> hackathon;
 
+    @OneToOne
+    private Sottomissione sottomissione;
+
+
+
     public Team(String name) {
         this.name = name;
         this.hackathon = new ArrayList<>();
@@ -28,10 +33,13 @@ public class Team {
     public Team() {
     }
 
+
+
+
+
     public Long getId() {
         return id;
     }
-
 
     public String getName() {
         return name;
@@ -55,5 +63,13 @@ public class Team {
 
     public void setHackathon(List<Hackathon> hackathon) {
         this.hackathon = hackathon;
+    }
+
+    public Sottomissione getSottomissione() {
+        return sottomissione;
+    }
+
+    public void setSottomissione(Sottomissione sottomissione) {
+        this.sottomissione = sottomissione;
     }
 }

@@ -14,13 +14,21 @@ import java.util.List;
 @Service
 public class SottomissioneService {
 
-    @Autowired
-    private SottomissioneRepository sottomissioneRepository;
-    private TeamRepository teamRepository;
-    private HackathonRepository hackathonRepository;
-    private ValutazioneRepository valutazioneRepository;
-    private MembroStaffRepository membroStaffRepository;
 
+    private final SottomissioneRepository sottomissioneRepository;
+    private final TeamRepository teamRepository;
+    private final HackathonRepository hackathonRepository;
+    private final ValutazioneRepository valutazioneRepository;
+    private final MembroStaffRepository membroStaffRepository;
+
+    @Autowired
+    public SottomissioneService(SottomissioneRepository sottomissioneRepository, TeamRepository teamRepository, HackathonRepository hackathonRepository, ValutazioneRepository valutazioneRepository, MembroStaffRepository membroStaffRepository) {
+        this.sottomissioneRepository = sottomissioneRepository;
+        this.teamRepository = teamRepository;
+        this.hackathonRepository = hackathonRepository;
+        this.valutazioneRepository = valutazioneRepository;
+        this.membroStaffRepository = membroStaffRepository;
+    }
 
     public List<Sottomissione> getAllSottomissione(){
         return sottomissioneRepository.findAll();
@@ -42,17 +50,28 @@ public class SottomissioneService {
                 hackathon
         );
 
+        if(hackathon.getStato() != StatoHackathon.IN_CORSO){
+            throw  new RuntimeException("Hackathon non in corso");
+        }
+
         hackathon.aggiungiSottomissione(sottomissione);
 
+        team.setSottomissione(sottomissione);
         return sottomissioneRepository.save(sottomissione);
     }
+
 
     @Transactional
     public Sottomissione aggiornaSottomissione(Long idSottomissione, SottomissioneDTO dto){
         Sottomissione sottomissione = sottomissioneRepository.findById(idSottomissione)
                 .orElseThrow(() -> new RuntimeException("Sottomissione non trovata con ID: " + idSottomissione));
 
+
         Hackathon hackathon = sottomissione.getHackathon();
+
+        if(hackathon.getStato() != StatoHackathon.IN_CORSO){
+            throw  new RuntimeException("Hackathon non in corso");
+        }
 
         sottomissione.setUrl(dto.url() != null ? dto.url() : sottomissione.getUrl());
         sottomissione.setDescrizione(dto.descrizione() != null ? dto.descrizione() : sottomissione.getDescrizione());
@@ -69,6 +88,10 @@ public class SottomissioneService {
 
         Hackathon hackathon = sottomissione.getHackathon();
 
+        if(hackathon.getStato() != StatoHackathon.IN_VALUTAZIONE){
+            throw new RuntimeException("Hackaton non in fase di valutazione");
+        }
+
         if (!hackathon.getGiudice().getId().equals(idGiudice)) {
             throw new RuntimeException("Giudice non assegnato all'Hackathon corrispondente alla sottomissione");
         }
@@ -81,8 +104,12 @@ public class SottomissioneService {
         valutazione.setSottomissione(sottomissione);
         valutazione.setGiudice(giudice);
 
+        sottomissione.setValutazione(valutazione);
 
         return valutazioneRepository.save(valutazione);
     }
 
+    public List<Valutazione> getAllValutazioni() {
+        return valutazioneRepository.findAll();
+    }
 }

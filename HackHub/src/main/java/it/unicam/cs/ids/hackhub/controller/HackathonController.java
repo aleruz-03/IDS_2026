@@ -1,11 +1,8 @@
 package it.unicam.cs.ids.hackhub.controller;
 
-import it.unicam.cs.ids.hackhub.controller.DTO.AggiungiMentoreDTO;
-import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
-import it.unicam.cs.ids.hackhub.controller.DTO.ModificaHackathonDTO;
-import it.unicam.cs.ids.hackhub.controller.DTO.creazioneHackathonDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.*;
 import it.unicam.cs.ids.hackhub.model.Hackathon;
-import it.unicam.cs.ids.hackhub.model.StatoHackathon;
+import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.service.HackathonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +15,15 @@ import java.util.List;
 @RequestMapping("/api/hackathon")
 public class HackathonController {
 
+
+    private final HackathonService hackathonService;
+    private final HackathonRepository hr;
+
     @Autowired
-    private HackathonService hackathonService;
-    private HackathonRepository hr;
+    public HackathonController(HackathonService hackathonService, HackathonRepository hr) {
+        this.hackathonService = hackathonService;
+        this.hr = hr;
+    }
 
     @GetMapping
     public ResponseEntity<List<HackathonResponseDTO>> visualizzaHackathon(){
@@ -56,11 +59,20 @@ public class HackathonController {
         return ResponseEntity.ok(HackathonResponseDTO.fromHackathon(hackathonAggiornato));
     }
 
-    //test nel body "NOME_STATO"
+    @PostMapping("/vincitore/{idOrganizzatore")
+    public ResponseEntity<HackathonResponseDTO> proclamaVincitore(@PathVariable Long idOrganizzatore, @RequestBody ProclamaVincitoreDTO proclamaVincitoreDTO){
+        Hackathon hackathon = hackathonService.proclamaVincitore(idOrganizzatore, proclamaVincitoreDTO.idTeam(), proclamaVincitoreDTO.idHackathon());
+        return ResponseEntity.ok(HackathonResponseDTO.fromHackathon(hackathon));
+    }
+
+
+
+
+    //test nel body { "stato": "NOME_STATO"}
     @PutMapping("/stato/{idHackathon}")
-    public ResponseEntity<Hackathon> cambiaStato(@PathVariable Long idHackathon, @RequestBody StatoHackathon stato){
+    public ResponseEntity<Hackathon> cambiaStato(@PathVariable Long idHackathon, @RequestBody StatoDTO stato){
         Hackathon hack = hr.getHackathonById(idHackathon);
-        hack.setStato(stato);
+        hack.setStato(stato.stato());
         hr.save(hack);
         return ResponseEntity.ok(hack);
     }

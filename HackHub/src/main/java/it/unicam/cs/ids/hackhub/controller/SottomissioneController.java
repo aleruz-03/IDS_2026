@@ -1,5 +1,6 @@
 package it.unicam.cs.ids.hackhub.controller;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.AllValutazioniDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ValutazioneDTO;
 import it.unicam.cs.ids.hackhub.model.Sottomissione;
@@ -15,8 +16,13 @@ import java.util.List;
 @RequestMapping("/api/sottomissioni")
 public class SottomissioneController {
 
+
+    private final SottomissioneService sottomissioneService;
+
     @Autowired
-    private SottomissioneService sottomissioneService;
+    public SottomissioneController(SottomissioneService sottomissioneService) {
+        this.sottomissioneService = sottomissioneService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Sottomissione>> visualizzaSottomissioni(){
@@ -45,5 +51,14 @@ public class SottomissioneController {
     @PostMapping("/valuta/{idGiudice}")
     public ResponseEntity<Valutazione> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO){
         return ResponseEntity.ok(sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO));
+    }
+
+    @GetMapping("/valutazioni")
+    public ResponseEntity<List<AllValutazioniDTO>> getAllValutazioni(){
+        List<Valutazione> valutazioni = sottomissioneService.getAllValutazioni();
+
+        return ResponseEntity.ok(valutazioni.stream()
+                .map(AllValutazioniDTO::fromValutazione)
+                .toList());
     }
 }

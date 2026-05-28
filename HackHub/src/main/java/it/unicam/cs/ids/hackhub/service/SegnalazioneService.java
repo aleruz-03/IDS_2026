@@ -20,12 +20,16 @@ import java.util.Optional;
 @Service
 public class SegnalazioneService {
 
+    private final SegnalazioneRepository segnalazioneRepository;
+    private final TeamRepository teamRepository;
+    private final MembroStaffRepository membroStaffRepository;
+
     @Autowired
-    private SegnalazioneRepository segnalazioneRepository;
-    @Autowired
-    private TeamRepository teamRepository;
-    @Autowired
-    private MembroStaffRepository membroStaffRepository;
+    public SegnalazioneService(SegnalazioneRepository segnalazioneRepository, TeamRepository teamRepository, MembroStaffRepository membroStaffRepository) {
+        this.segnalazioneRepository = segnalazioneRepository;
+        this.teamRepository = teamRepository;
+        this.membroStaffRepository = membroStaffRepository;
+    }
 
     public List<Segnalazione> getAllSegnalazioni(){
         return segnalazioneRepository.findAll();
