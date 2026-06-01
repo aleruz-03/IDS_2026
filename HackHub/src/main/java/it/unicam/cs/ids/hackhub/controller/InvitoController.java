@@ -24,18 +24,37 @@ public class InvitoController {
 
 
     @PostMapping("/crea/{idMittente}")
-    public ResponseEntity<Invito> creaInvito(@PathVariable Long idMittente, @RequestBody InvitoDTO invitoDTO){
-        return ResponseEntity.ok(invitoService.invioInvito(idMittente, invitoDTO.idDestinatario(), invitoDTO.idTeam()));
+    public ResponseEntity<String> creaInvito(@PathVariable Long idMittente, @RequestBody InvitoDTO invitoDTO){
+        try {
+            Invito nuovoInvito = invitoService.invioInvito(idMittente, invitoDTO.idDestinatario(), invitoDTO.idTeam());
+            return ResponseEntity.status(201).body("Invito inviato con successo! ID Invito: " + nuovoInvito.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione dell'invito: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile inviare l'invito: " + e.getMessage());
+        }
     }
 
     @PostMapping("/accetta/{idInvito}")
-    public ResponseEntity<Team> accettaInvito(@PathVariable Long idInvito){
-        return ResponseEntity.ok(invitoService.accettaInvito(idInvito));
+    public ResponseEntity<String> accettaInvito(@PathVariable Long idInvito){
+        try {
+            Team teamAggiornato = invitoService.accettaInvito(idInvito);
+            return ResponseEntity.ok("Invito accettato con successo! L'utente è entrato a far parte del team '" + teamAggiornato.getName() + "'.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore: Invito non trovato.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile accettare l'invito: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/rifiuta/{idInvito}")
-    public ResponseEntity<Invito> rifiutaInvito(@PathVariable Long idInvito){
-        return ResponseEntity.ok(invitoService.rifiutaInvito(idInvito));
+    public ResponseEntity<String> rifiutaInvito(@PathVariable Long idInvito){
+        try {
+            invitoService.rifiutaInvito(idInvito);
+            return ResponseEntity.ok("Invito con ID " + idInvito + " rifiutato e rimosso correttamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Impossibile rifiutare: invito non trovato.");
+        }
     }
 
     @GetMapping("/inviti")

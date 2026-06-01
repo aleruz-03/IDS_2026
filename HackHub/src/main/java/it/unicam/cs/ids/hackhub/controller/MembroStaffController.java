@@ -18,26 +18,44 @@ public class MembroStaffController {
     private final MembroStaffService membroStaffService;
 
     @Autowired
-    public MembroStaffController(MembroStaffService membroStaffService) {this.membroStaffService = membroStaffService;}
-
-    @PostMapping("/organizzatore")
-    public ResponseEntity<Organizzatore> createOrganizzatore(@RequestBody CreazioneMembroStaffDTO organizzatoreDTO) {
-        return ResponseEntity.ok(membroStaffService.createOrganizzatore(organizzatoreDTO));
+    public MembroStaffController(MembroStaffService membroStaffService) {
+        this.membroStaffService = membroStaffService;
     }
 
+    @PostMapping("/organizzatore")
+    public ResponseEntity<String> createOrganizzatore(@RequestBody CreazioneMembroStaffDTO organizzatoreDTO) {
+        try {
+            Organizzatore organizzatore = membroStaffService.createOrganizzatore(organizzatoreDTO);
+            return ResponseEntity.status(201).body("Organizzatore creato con successo! ID assegnato: " + organizzatore.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione dell'organizzatore: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
+        }
+    }
 
     @PostMapping("/mentore")
-    public ResponseEntity<Mentore> createMentore(@RequestBody CreazioneMembroStaffDTO mentoreDTO) {
-        return ResponseEntity.ok(membroStaffService.createMentore(mentoreDTO));
+    public ResponseEntity<String> createMentore(@RequestBody CreazioneMembroStaffDTO mentoreDTO) {
+        try {
+            Mentore mentore = membroStaffService.createMentore(mentoreDTO);
+            return ResponseEntity.status(201).body("Mentore creato con successo! ID assegnato: " + mentore.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione del mentore: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
+        }
     }
 
     @PostMapping("/giudice")
-    public ResponseEntity<Giudice> createGiudice(@RequestBody CreazioneMembroStaffDTO giudiceDTO) {
-        return ResponseEntity.ok(membroStaffService.createGiudice(giudiceDTO));
+    public ResponseEntity<String> createGiudice(@RequestBody CreazioneMembroStaffDTO giudiceDTO) {
+        try {
+            Giudice giudice = membroStaffService.createGiudice(giudiceDTO);
+            return ResponseEntity.status(201).body("Giudice creato con successo! ID assegnato: " + giudice.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione del giudice: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
+        }
     }
-
-
-
-
 
 }

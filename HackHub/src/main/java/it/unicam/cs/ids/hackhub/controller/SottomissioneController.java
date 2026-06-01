@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/api/sottomissioni")
 public class SottomissioneController {
 
-
     private final SottomissioneService sottomissioneService;
 
     @Autowired
@@ -36,21 +35,40 @@ public class SottomissioneController {
     }
 
     @PostMapping("/invia")
-    public ResponseEntity<Sottomissione> inviaSottomissione(@RequestBody SottomissioneDTO sottomissioneDTO){
-        Sottomissione nuovaSottomissione = sottomissioneService.createSottomissione(sottomissioneDTO);
-
-        return ResponseEntity.ok(nuovaSottomissione);
+    public ResponseEntity<String> inviaSottomissione(@RequestBody SottomissioneDTO sottomissioneDTO){
+        try {
+            sottomissioneService.createSottomissione(sottomissioneDTO);
+            return ResponseEntity.status(201).body("Sottomissione inviata con successo per il team selezionato!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nell'invio: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile inviare: " + e.getMessage());
+        }
     }
 
+
     @PutMapping("/aggiorna/{idSottomissione}")
-    public ResponseEntity<Sottomissione> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO){
-        Sottomissione sottomissioneAggiornata = sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
-        return ResponseEntity.ok(sottomissioneAggiornata);
+    public ResponseEntity<String> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO){
+        try {
+            sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
+            return ResponseEntity.ok("Sottomissione con ID " + idSottomissione + " aggiornata correttamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nell'aggiornamento: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile modificare il progetto: " + e.getMessage());
+        }
     }
 
     @PostMapping("/valuta/{idGiudice}")
-    public ResponseEntity<Valutazione> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO){
-        return ResponseEntity.ok(sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO));
+    public ResponseEntity<String> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO){
+        try {
+            sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO);
+            return ResponseEntity.status(201).body("Valutazione registrata con successo dal giudice con ID " + idGiudice + ".");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella valutazione: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile valutare: " + e.getMessage());
+        }
     }
 
     @GetMapping("/valutazioni")

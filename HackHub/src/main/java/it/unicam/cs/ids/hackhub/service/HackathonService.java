@@ -4,6 +4,10 @@ import it.unicam.cs.ids.hackhub.controller.DTO.AggiungiMentoreDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ModificaHackathonDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.creazioneHackathonDTO;
 import it.unicam.cs.ids.hackhub.model.*;
+import it.unicam.cs.ids.hackhub.model.state.Concluso;
+import it.unicam.cs.ids.hackhub.model.state.InCorso;
+import it.unicam.cs.ids.hackhub.model.state.InIscrizione;
+import it.unicam.cs.ids.hackhub.model.state.InValutazione;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.repository.MembroStaffRepository;
 import it.unicam.cs.ids.hackhub.repository.TeamRepository;
@@ -151,6 +155,19 @@ public class HackathonService {
             }
         }
         return true;
+    }
+
+    public Hackathon cambiaStato(Long idHackathon, StatoHackathon stato){
+        Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+
+        switch (stato) {
+            case ISCRIZIONE -> hackathon.cambiaStato(new InIscrizione());
+            case IN_CORSO -> hackathon.cambiaStato(new InCorso());
+            case IN_VALUTAZIONE -> hackathon.cambiaStato(new InValutazione());
+            case CONCLUSO -> hackathon.cambiaStato(new Concluso());
+        }
+
+        return hackathonRepository.save(hackathon);
     }
 
 

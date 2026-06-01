@@ -1,7 +1,6 @@
 package it.unicam.cs.ids.hackhub.controller;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.GestioneSupportoDTO;
-import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.RichiestaSupporto;
 import it.unicam.cs.ids.hackhub.service.RichiestaSupportoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +32,13 @@ public class RichiestaSupportoController {
     }**/
 
     @PostMapping("/crea/{idTeam}")
-    public ResponseEntity<RichiestaSupporto> creaRichiesta(@PathVariable Long idTeam, @RequestParam String descrizione){
-        RichiestaSupporto richiesta = richiestaSupportoService.creaRichiestaSupporto(idTeam, descrizione);
-        return ResponseEntity.status(HttpStatus.CREATED).body(richiesta);
+    public ResponseEntity<String> creaRichiesta(@PathVariable Long idTeam, @RequestParam String descrizione){
+        try {
+            richiestaSupportoService.creaRichiestaSupporto(idTeam, descrizione);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Richiesta di supporto creata con successo per il team con ID " + idTeam + ".");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Errore nella creazione: " + e.getMessage());
+        }
     }
 
     @GetMapping("/mentore/{idMentore}/tutte")
@@ -66,12 +69,18 @@ public class RichiestaSupportoController {
     }
 
     @PutMapping("/mentore/{idMentore}/risolvi/{idRichiesta}")
-    public ResponseEntity<RichiestaSupporto> risolviRichiesta(
+    public ResponseEntity<String> risolviRichiesta(
             @PathVariable Long idMentore,
             @PathVariable Long idRichiesta,
             @RequestBody GestioneSupportoDTO dto
     ){
-        RichiestaSupporto aggiornata = richiestaSupportoService.rispondiERisolviRichiesta(idRichiesta, idMentore, dto);
-        return ResponseEntity.ok(aggiornata);
+        try {
+            richiestaSupportoService.rispondiERisolviRichiesta(idRichiesta, idMentore, dto);
+            return ResponseEntity.ok("La richiesta di supporto con ID " + idRichiesta + " è stata contrassegnata come RISOLTA dal mentore.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Impossibile risolvere la richiesta: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Errore nella gestione della richiesta: " + e.getMessage());
+        }
     }
 }

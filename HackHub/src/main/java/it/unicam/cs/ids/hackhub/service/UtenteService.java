@@ -1,5 +1,6 @@
 package it.unicam.cs.ids.hackhub.service;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.LoginDTO;
 import it.unicam.cs.ids.hackhub.model.Utente;
 import it.unicam.cs.ids.hackhub.repository.UtenteRepository;
 import org.jspecify.annotations.Nullable;
@@ -26,5 +27,23 @@ public class UtenteService {
 
     public List<Utente> getAllUtenti() {
         return utenteRepository.findAll();
+    }
+
+    public boolean deleteUtente(Long id){
+        if (utenteRepository.existsById(id)) {
+            utenteRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public Utente login(LoginDTO loginDTO){
+        Utente utente = utenteRepository.findByEmail(loginDTO.email());
+
+        if(utente != null && utente.getPassword().equals(loginDTO.password())){
+            return utente;
+        }
+
+        throw new IllegalArgumentException("Credenziali non valide: email o password errate.");
     }
 }

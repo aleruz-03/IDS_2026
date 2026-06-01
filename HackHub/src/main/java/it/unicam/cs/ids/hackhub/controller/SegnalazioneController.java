@@ -30,28 +30,39 @@ public class SegnalazioneController {
         return ResponseEntity.ok(segnalazioneService.getAllSegnalazioneOfMentore(idMentore));
     }
 
-    @PostMapping("/add/{idMentore}")
-    public ResponseEntity<Segnalazione> segnalaTeam(@RequestBody SegnalazioneDTO segnalazioneDTO) {
-        return ResponseEntity.ok(segnalazioneService.createSegnalazione(segnalazioneDTO));
-    }
-
     @GetMapping("/{idSegnalazione}")
     public ResponseEntity<Segnalazione> visualizzaDettaglioSegnalazione(@PathVariable Long idSegnalazione){
         return ResponseEntity.ok(segnalazioneService.getSegnalazioneById(idSegnalazione));
     }
 
-    @PutMapping("/modifica/{idSegnalazione}")
-    public ResponseEntity<Segnalazione> modificaSegnalazione(@PathVariable Long idSegnalazione, @RequestBody String descrizione){
-        Segnalazione segnalazioneAggiornata = segnalazioneService.modificaSegnalazione(idSegnalazione, descrizione);
+    @PostMapping("/add/{idMentore}")
+    public ResponseEntity<String> segnalaTeam(@RequestBody SegnalazioneDTO segnalazioneDTO) {
+        try {
+            segnalazioneService.createSegnalazione(segnalazioneDTO);
+            return ResponseEntity.status(201).body("Segnalazione creata con successo dal mentore con ID " + segnalazioneDTO.idMentore() + ".");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione della segnalazione: " + e.getMessage());
+        }
+    }
 
-        return ResponseEntity.ok(segnalazioneAggiornata);
+    @PutMapping("/modifica/{idSegnalazione}")
+    public ResponseEntity<String> modificaSegnalazione(@PathVariable Long idSegnalazione, @RequestBody String descrizione){
+        try {
+            segnalazioneService.modificaSegnalazione(idSegnalazione, descrizione);
+            return ResponseEntity.ok("Segnalazione con ID " + idSegnalazione + " modificata correttamente.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Impossibile modificare: " + e.getMessage());
+        }
     }
 
     @DeleteMapping("/elimina/{idSegnalazione}")
     public ResponseEntity<String> eliminaSegnalazione(@PathVariable Long idSegnalazione){
-        segnalazioneService.eliminaSegnalazione(idSegnalazione);
-
-        return ResponseEntity.ok("Segnalazione eliminata con successo.");
+        try {
+            segnalazioneService.eliminaSegnalazione(idSegnalazione);
+            return ResponseEntity.ok("Segnalazione con ID " + idSegnalazione + " eliminata con successo.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Impossibile eliminare: segnalazione non trovata.");
+        }
     }
 
 }

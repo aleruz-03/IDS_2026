@@ -22,6 +22,7 @@
 - valuta sottomissione
 
 ### da testare
+- elimina utente
  
 ### in corso
 

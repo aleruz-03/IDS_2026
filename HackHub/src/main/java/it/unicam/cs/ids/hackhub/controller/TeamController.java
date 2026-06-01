@@ -1,8 +1,6 @@
 package it.unicam.cs.ids.hackhub.controller;
 
-import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.IscrizioneDTO;
-import it.unicam.cs.ids.hackhub.model.Hackathon;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +21,13 @@ public class TeamController {
     }
 
     @PostMapping("/crea/{idCreatore}")
-    public ResponseEntity<Team> creaTeam(@PathVariable Long idCreatore, @RequestBody Team team){
-        return ResponseEntity.ok(teamService.creaTeam(team, idCreatore));
+    public ResponseEntity<String> creaTeam(@PathVariable Long idCreatore, @RequestBody Team team){
+        try {
+            Team nuovoTeam = teamService.creaTeam(team, idCreatore);
+            return ResponseEntity.status(201).body("Team '" + nuovoTeam.getName() + "' creato con successo!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore nella creazione: " + e.getMessage());
+        }
     }
 
     @GetMapping("/teams")
@@ -34,9 +37,15 @@ public class TeamController {
 
 
     @PostMapping("/iscrizione/{idUtente}")
-    public ResponseEntity<HackathonResponseDTO> iscriviTeam(@PathVariable Long idUtente, @RequestBody IscrizioneDTO iscrizioneDTO){
-        Hackathon hackathon = teamService.iscriviTeam(idUtente, iscrizioneDTO.idTeam(), iscrizioneDTO.idHackathon());
-        return ResponseEntity.ok(HackathonResponseDTO.fromHackathon(hackathon));
+    public ResponseEntity<String> iscriviTeam(@PathVariable Long idUtente, @RequestBody IscrizioneDTO iscrizioneDTO){
+        try {
+            teamService.iscriviTeam(idUtente, iscrizioneDTO.idTeam(), iscrizioneDTO.idHackathon());
+            return ResponseEntity.ok("Iscrizione completata! Il team è stato registrato all'hackathon.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Errore di iscrizione: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(400).body("Impossibile iscriversi: " + e.getMessage());
+        }
     }
 
 
