@@ -30,8 +30,8 @@ public class TeamService {
     }
 
 
-    public Team creaTeam(Team team, Long idCreatore){
-        Team newTeam = new Team(team.getName());
+    public Team creaTeam(String name, Long idCreatore){
+        Team newTeam = new Team(name);
         List<Utente> partecipanti = new ArrayList<>();
         partecipanti.add(utenteRepository.getUtenteById(idCreatore));
         newTeam.setPartecipanti(partecipanti);
@@ -66,5 +66,10 @@ public class TeamService {
         
         return hackathonRepository.save(hackathon);
 
+    }
+
+    public List<Team> getAllTeamsOfHackathon(Long idHackathon) {
+        Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        return hackathon.getTeams();
     }
 }

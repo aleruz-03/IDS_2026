@@ -21,9 +21,9 @@ public class TeamController {
     }
 
     @PostMapping("/crea/{idCreatore}")
-    public ResponseEntity<String> creaTeam(@PathVariable Long idCreatore, @RequestBody Team team){
+    public ResponseEntity<String> creaTeam(@PathVariable Long idCreatore, @RequestBody String name){
         try {
-            Team nuovoTeam = teamService.creaTeam(team, idCreatore);
+            Team nuovoTeam = teamService.creaTeam(name, idCreatore);
             return ResponseEntity.status(201).body("Team '" + nuovoTeam.getName() + "' creato con successo!");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body("Errore nella creazione: " + e.getMessage());
@@ -46,6 +46,11 @@ public class TeamController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(400).body("Impossibile iscriversi: " + e.getMessage());
         }
+    }
+
+    @GetMapping("teams/hackathon/{idHackathon}")
+    public ResponseEntity<List<Team>> getAllTeamsOfHackathon(@PathVariable Long idHackathon){
+        return ResponseEntity.ok(teamService.getAllTeamsOfHackathon(idHackathon));
     }
 
 

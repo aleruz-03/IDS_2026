@@ -12,7 +12,7 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    private  String name;
+    private String name;
 
     @ManyToMany
     private List<Utente> partecipanti;
@@ -22,8 +22,6 @@ public class Team {
 
     @OneToOne
     private Sottomissione sottomissione;
-
-
 
     public Team(String name) {
         this.name = name;

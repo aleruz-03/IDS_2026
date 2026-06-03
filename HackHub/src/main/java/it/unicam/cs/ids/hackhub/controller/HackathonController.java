@@ -92,5 +92,6 @@ public class HackathonController {
             return ResponseEntity.status(404).body("Hackathon non trovato.");
         } catch (IllegalStateException e) {
             return ResponseEntity.status(400).body("Transizione di stato non valida: " + e.getMessage());
-        }    }
+        }
+    }
 }
