@@ -1,8 +1,6 @@
 package it.unicam.cs.ids.hackhub.controller;
 
-import it.unicam.cs.ids.hackhub.controller.DTO.AllValutazioniDTO;
-import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
-import it.unicam.cs.ids.hackhub.controller.DTO.ValutazioneDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.*;
 import it.unicam.cs.ids.hackhub.model.Sottomissione;
 import it.unicam.cs.ids.hackhub.model.Valutazione;
 import it.unicam.cs.ids.hackhub.service.SottomissioneService;
@@ -24,14 +22,13 @@ public class SottomissioneController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Sottomissione>> visualizzaSottomissioni(){
+    public ResponseEntity<List<SottomissioneResponseDTO>> visualizzaSottomissioni(){
         List<Sottomissione> sottomissioniList = sottomissioneService.getAllSottomissione();
 
-        if (sottomissioniList.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(sottomissioniList);
+        List<SottomissioneResponseDTO> response = sottomissioniList.stream()
+                .map(SottomissioneResponseDTO::fromSottomissione)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/invia")
@@ -79,4 +76,11 @@ public class SottomissioneController {
                 .map(AllValutazioniDTO::fromValutazione)
                 .toList());
     }
+
+    @GetMapping("sottomissioneTeam/{idTeam}")
+    public ResponseEntity<SottomissioneResponseDTO>  getSottomissioneTeam(@PathVariable Long idTeam){
+        Sottomissione sottomissione = sottomissioneService.getSottomissioneOfTeam(idTeam);
+        return ResponseEntity.ok(SottomissioneResponseDTO.fromSottomissione(sottomissione));
+    }
+
 }

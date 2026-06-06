@@ -24,7 +24,7 @@ public class UtenteController {
     public ResponseEntity<String> createUtente(@RequestBody Utente utente) {
         try {
             Utente nuovoUtente = utenteService.createUtente(utente);
-            return ResponseEntity.status(201).body("Utente '" + nuovoUtente.getNome() + " " + nuovoUtente.getCognome() + "' registrato con successo!");
+            return ResponseEntity.status(201).body("Utente '" + nuovoUtente.getNome() + " " + nuovoUtente.getCognome() + " " + nuovoUtente.getId() + "' registrato con successo!");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("Errore durante la registrazione: " + e.getMessage());
         }
@@ -55,5 +55,7 @@ public class UtenteController {
             return ResponseEntity.status(401).body("Errore di autenticazione: " + e.getMessage());
         }
     }
+
+
 
 }

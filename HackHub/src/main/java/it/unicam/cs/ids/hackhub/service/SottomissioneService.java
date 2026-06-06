@@ -112,4 +112,10 @@ public class SottomissioneService {
     public List<Valutazione> getAllValutazioni() {
         return valutazioneRepository.findAll();
     }
+
+    public Sottomissione getSottomissioneOfTeam(Long idTeam) {
+        Team team = teamRepository.findById(idTeam).orElseThrow(() -> new RuntimeException("Team non trovata"));
+        Sottomissione sottomissione = sottomissioneRepository.getSottomissioneByTeam(team);
+        return sottomissione;
+    }
 }

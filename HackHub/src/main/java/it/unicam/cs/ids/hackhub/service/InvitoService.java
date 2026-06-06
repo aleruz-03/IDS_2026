@@ -54,4 +54,11 @@ public class InvitoService {
     public List<Invito> getAllInviti() {
         return invitoRepository.findAll();
     }
+
+    public List<Invito> getPropriInviti(Long idUtente){
+        Utente utente= utenteRepository.getUtenteById(idUtente);
+        return invitoRepository.getAllInvitoByMittente(utente);
+    }
+
+
 }

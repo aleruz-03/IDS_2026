@@ -10,11 +10,15 @@ import it.unicam.cs.ids.hackhub.model.state.InIscrizione;
 import it.unicam.cs.ids.hackhub.model.state.InValutazione;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.repository.MembroStaffRepository;
+import it.unicam.cs.ids.hackhub.repository.SottomissioneRepository;
 import it.unicam.cs.ids.hackhub.repository.TeamRepository;
+import it.unicam.cs.ids.hackhub.repository.ValutazioneRepository;
 import it.unicam.cs.ids.hackhub.service.adapter.SistemaPagamentoAdapter;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,13 +28,17 @@ public class HackathonService {
     private final HackathonRepository hackathonRepository;
     private final MembroStaffRepository membroStaffRepository;
     private final TeamRepository teamRepository;
+    private final SottomissioneRepository sottomissioneRepository;
+    private final ValutazioneRepository valutazioneRepository;
     private final SistemaPagamentoAdapter sistemaPagamentoAdapter;
 
     @Autowired
-    public HackathonService(HackathonRepository hackathonRepository, MembroStaffRepository membroStaffRepository, TeamRepository teamRepository, SistemaPagamentoAdapter sistemaPagamentoAdapter) {
+    public HackathonService(HackathonRepository hackathonRepository, MembroStaffRepository membroStaffRepository, TeamRepository teamRepository, SottomissioneRepository sottomissioneRepository, ValutazioneRepository valutazioneRepository, SistemaPagamentoAdapter sistemaPagamentoAdapter) {
         this.hackathonRepository = hackathonRepository;
         this.membroStaffRepository = membroStaffRepository;
         this.teamRepository = teamRepository;
+        this.sottomissioneRepository = sottomissioneRepository;
+        this.valutazioneRepository = valutazioneRepository;
         this.sistemaPagamentoAdapter = sistemaPagamentoAdapter;
     }
 
@@ -117,7 +125,7 @@ public class HackathonService {
     }
 
 
-    public Hackathon proclamaVincitore(Long idOrganizzatore, Long idTeam, Long idHackathon){
+    public void proclamaVincitore(Long idOrganizzatore, Long idTeam, Long idHackathon){
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
         Team team = teamRepository.getTeamById(idTeam);
 
@@ -143,7 +151,7 @@ public class HackathonService {
         }
 
         hackathon.setTeamVincitore(team);
-        return hackathonRepository.save(hackathon);
+        hackathonRepository.save(hackathon);
 
     }
 
@@ -171,4 +179,64 @@ public class HackathonService {
     }
 
 
+    @Transactional
+    public boolean deleteHackathon(Long idHackathon) {
+        Hackathon hackathon = hackathonRepository.findById(idHackathon).orElse(null);
+        if (hackathon == null) {
+            return false;
+        }
+
+        List<Team> teams = hackathon.getTeams() == null ? new ArrayList<>() : new ArrayList<>(hackathon.getTeams());
+        for (Team team : teamRepository.findByHackathonContaining(hackathon)) {
+            boolean giaPresente = teams.stream()
+                    .anyMatch(t -> t.getId() != null && t.getId().equals(team.getId()));
+            if (!giaPresente) {
+                teams.add(team);
+            }
+        }
+        List<Sottomissione> sottomissioni = sottomissioneRepository.findByHackathon(hackathon);
+
+        hackathon.setTeamVincitore(null);
+
+        List<MembroDelloStaff> membriStaff = membroStaffRepository.findByHackathon(hackathon);
+        for (MembroDelloStaff membroStaff : membriStaff) {
+            membroStaff.setHackathon(null);
+        }
+        membroStaffRepository.saveAll(membriStaff);
+
+        for (Team team : teams) {
+            if (team.getHackathon() != null) {
+                team.getHackathon().removeIf(h -> h != null && idHackathon.equals(h.getId()));
+            }
+            if (team.getSottomissione() != null && sottomissioni.stream()
+                    .anyMatch(s -> s.getId() != null && s.getId().equals(team.getSottomissione().getId()))) {
+                team.setSottomissione(null);
+            }
+        }
+        teamRepository.saveAll(teams);
+        teamRepository.flush();
+
+        if (hackathon.getMentori() != null) {
+            hackathon.getMentori().clear();
+        }
+        if (hackathon.getTeams() != null) {
+            hackathon.getTeams().clear();
+        }
+        hackathonRepository.save(hackathon);
+        hackathonRepository.flush();
+
+        for (Sottomissione sottomissione : sottomissioni) {
+            sottomissione.setValutazione(null);
+        }
+        sottomissioneRepository.saveAll(sottomissioni);
+        sottomissioneRepository.flush();
+
+        if (!sottomissioni.isEmpty()) {
+            valutazioneRepository.deleteAll(valutazioneRepository.findBySottomissioneIn(sottomissioni));
+            sottomissioneRepository.deleteAll(sottomissioni);
+        }
+
+        hackathonRepository.delete(hackathon);
+        return true;
+    }
 }

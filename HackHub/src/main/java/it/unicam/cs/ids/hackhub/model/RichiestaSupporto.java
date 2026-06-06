@@ -25,10 +25,12 @@ public class RichiestaSupporto {
     @ManyToOne
     private Mentore mentore;
 
-    public RichiestaSupporto(String descrizione, String linkCall, Date dataCall, Mentore mentore) {
+    @ManyToOne
+    private Team team;
+
+    public RichiestaSupporto(String descrizione,Team team, Mentore mentore) {
         this.descrizione = descrizione;
-        this.linkCall = linkCall;
-        this.dataCall = dataCall;
+        this.team = team;
         this.mentore = mentore;
         this.evasa = false;
     }
@@ -86,5 +88,9 @@ public class RichiestaSupporto {
 
     public void setMentore(Mentore mentore) {
         this.mentore = mentore;
+    }
+
+    public Team getTeam() {
+        return team;
     }
 }

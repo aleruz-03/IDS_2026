@@ -94,4 +94,17 @@ public class HackathonController {
             return ResponseEntity.status(400).body("Transizione di stato non valida: " + e.getMessage());
         }
     }
+
+
+    @DeleteMapping("/elimina/{idHackathon}")
+    public ResponseEntity<String> eliminaHackathon(@PathVariable Long idHackathon){
+        boolean eliminato = hackathonService.deleteHackathon(idHackathon);
+        if (eliminato) {
+            return ResponseEntity.ok("Hackathon con ID " + idHackathon + " eliminato con sucesso.");
+        } else {
+            return ResponseEntity.status(404).body("Impossibile eliminare: hackathon non trovato.");
+        }
+
+    }
+
 }

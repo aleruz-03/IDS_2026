@@ -1,6 +1,7 @@
 package it.unicam.cs.ids.hackhub.controller;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.SegnalazioneDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.SegnalazioneResponseDTO;
 import it.unicam.cs.ids.hackhub.model.Segnalazione;
 import it.unicam.cs.ids.hackhub.service.SegnalazioneService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,25 +22,30 @@ public class SegnalazioneController {
     }
 
     @GetMapping("/organizzatore/{idOrganizzatore}")
-    public ResponseEntity<List<Segnalazione>> visualizzaSegnalazioniOrganizzatore(@PathVariable Long idOrganizzatore) {
-        return ResponseEntity.ok(segnalazioneService.getAllSegnalazioniOfOrganizzatore(idOrganizzatore));
+    public ResponseEntity<List<SegnalazioneResponseDTO>> visualizzaSegnalazioniOrganizzatore(@PathVariable Long idOrganizzatore) {
+        return ResponseEntity.ok(segnalazioneService.getAllSegnalazioniOfOrganizzatore(idOrganizzatore).stream()
+                .map(SegnalazioneResponseDTO::fromSegnalazione)
+                .toList());
     }
 
     @GetMapping("/mentore/{idMentore}")
-    public ResponseEntity<List<Segnalazione>> visualizzaSegnalazioniMentore(@PathVariable Long idMentore) {
-        return ResponseEntity.ok(segnalazioneService.getAllSegnalazioneOfMentore(idMentore));
+    public ResponseEntity<List<SegnalazioneResponseDTO>> visualizzaSegnalazioniMentore(@PathVariable Long idMentore) {
+        return ResponseEntity.ok(segnalazioneService.getAllSegnalazioneOfMentore(idMentore).stream()
+                .map(SegnalazioneResponseDTO::fromSegnalazione)
+                .toList());
     }
 
     @GetMapping("/{idSegnalazione}")
-    public ResponseEntity<Segnalazione> visualizzaDettaglioSegnalazione(@PathVariable Long idSegnalazione){
-        return ResponseEntity.ok(segnalazioneService.getSegnalazioneById(idSegnalazione));
+    public ResponseEntity<SegnalazioneResponseDTO> visualizzaDettaglioSegnalazione(@PathVariable Long idSegnalazione){
+        Segnalazione segnalazione = segnalazioneService.getSegnalazioneById(idSegnalazione);
+        return ResponseEntity.ok(SegnalazioneResponseDTO.fromSegnalazione(segnalazione));
     }
 
     @PostMapping("/add/{idMentore}")
-    public ResponseEntity<String> segnalaTeam(@RequestBody SegnalazioneDTO segnalazioneDTO) {
+    public ResponseEntity<String> segnalaTeam(@PathVariable Long idMentore, @RequestBody SegnalazioneDTO segnalazioneDTO) {
         try {
-            segnalazioneService.createSegnalazione(segnalazioneDTO);
-            return ResponseEntity.status(201).body("Segnalazione creata con successo dal mentore con ID " + segnalazioneDTO.idMentore() + ".");
+            segnalazioneService.createSegnalazione(idMentore, segnalazioneDTO);
+            return ResponseEntity.status(201).body("Segnalazione creata con successo dal mentore con ID " + idMentore + ".");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body("Errore nella creazione della segnalazione: " + e.getMessage());
         }
@@ -64,5 +70,28 @@ public class SegnalazioneController {
             return ResponseEntity.status(404).body("Impossibile eliminare: segnalazione non trovata.");
         }
     }
+
+
+    @DeleteMapping("/segnalazione/{idSegnalazione}/nonFondata/{idOrganizzatore}")
+    public ResponseEntity<String> segnalazioneNonFondata(@PathVariable Long idSegnalazione, @PathVariable Long idOrganizzatore){
+        try {
+            segnalazioneService.segnalazioneNonFondata(idSegnalazione, idOrganizzatore);
+            return ResponseEntity.ok("Segnalazione con ID " + idSegnalazione + " gestita con successo.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Impossibile eliminare: segnalazione non trovata.");
+        }
+    }
+
+    @PutMapping("/segnalazione/{idSegnalazione}/bannaTeam/{idOrganizzatore}")
+    public ResponseEntity<String> bannaTeam(@PathVariable Long idSegnalazione, @PathVariable Long idOrganizzatore, @RequestBody Long idHackathon){
+        try {
+            segnalazioneService.bannaTeam(idSegnalazione, idOrganizzatore, idHackathon);
+            return ResponseEntity.ok("Segnalazione con ID " + idSegnalazione + " gestita con successo.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body("Impossibile eliminare: segnalazione non trovata.");
+        }
+    }
+
+
 
 }

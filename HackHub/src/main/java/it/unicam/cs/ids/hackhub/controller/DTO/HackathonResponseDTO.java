@@ -16,7 +16,7 @@ public record HackathonResponseDTO(
         Date end,
         LocationResponseDTO location,
         double premioInDenaro,
-        List<Team> teams,
+        List<TeamResponseDTO> teams,
         Team teamVincitore,
         MembroStaffResponseDTO organizzatore,
         MembroStaffResponseDTO giudice,
@@ -30,10 +30,11 @@ public record HackathonResponseDTO(
                 .map(MembroStaffResponseDTO::fromMembroStaff)
                 .toList();
 
-        List<Team> teams = hackathon.getTeams() == null
+        List<TeamResponseDTO> teams = hackathon.getTeams() == null
                 ? List.of()
-                :hackathon.getTeams().stream()
-                 .toList();
+                : hackathon.getTeams().stream()
+                .map(TeamResponseDTO::fromTeam)
+                .toList();
 
         return new HackathonResponseDTO(
                 hackathon.getId(),

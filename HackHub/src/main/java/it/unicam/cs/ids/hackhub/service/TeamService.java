@@ -31,7 +31,7 @@ public class TeamService {
 
 
     public Team creaTeam(String name, Long idCreatore){
-        Team newTeam = new Team(name);
+        Team newTeam = new Team(name.trim());
         List<Utente> partecipanti = new ArrayList<>();
         partecipanti.add(utenteRepository.getUtenteById(idCreatore));
         newTeam.setPartecipanti(partecipanti);

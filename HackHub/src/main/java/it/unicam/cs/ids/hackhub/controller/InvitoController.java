@@ -62,4 +62,9 @@ public class InvitoController {
         return  ResponseEntity.ok(invitoService.getAllInviti());
     }
 
+
+    @GetMapping("/invitiMandati/{idUtente}")
+    public ResponseEntity<List<Invito>> getInvitiMandati(@PathVariable Long idUtente){
+        return ResponseEntity.ok(invitoService.getPropriInviti(idUtente));
+    }
 }

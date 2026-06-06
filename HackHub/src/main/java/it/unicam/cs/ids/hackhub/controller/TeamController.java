@@ -1,6 +1,8 @@
 package it.unicam.cs.ids.hackhub.controller;
 
+import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.IscrizioneDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.TeamResponseDTO;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +33,9 @@ public class TeamController {
     }
 
     @GetMapping("/teams")
-    public ResponseEntity<List<Team>> getAllTeams(){
-        return ResponseEntity.ok(teamService.getAllTeams());
+    public ResponseEntity<List<TeamResponseDTO>> getAllTeams(){
+        List<Team> teams =  teamService.getAllTeams();
+        return ResponseEntity.ok(teams.stream().map(TeamResponseDTO::fromTeam).toList());
     }
 
 
@@ -49,8 +52,9 @@ public class TeamController {
     }
 
     @GetMapping("teams/hackathon/{idHackathon}")
-    public ResponseEntity<List<Team>> getAllTeamsOfHackathon(@PathVariable Long idHackathon){
-        return ResponseEntity.ok(teamService.getAllTeamsOfHackathon(idHackathon));
+    public ResponseEntity<List<TeamResponseDTO>> getAllTeamsOfHackathon(@PathVariable Long idHackathon){
+        List<Team> teams = teamService.getAllTeamsOfHackathon(idHackathon);
+        return ResponseEntity.ok(teams.stream().map(TeamResponseDTO::fromTeam).toList());
     }
 
 

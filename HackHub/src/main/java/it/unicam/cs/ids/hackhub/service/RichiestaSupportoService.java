@@ -1,12 +1,14 @@
 package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.GestioneSupportoDTO;
+import it.unicam.cs.ids.hackhub.controller.DTO.RichiestaSupportoDTO;
 import it.unicam.cs.ids.hackhub.model.Hackathon;
 import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.StatoHackathon;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.model.RichiestaSupporto;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
+import it.unicam.cs.ids.hackhub.repository.MembroStaffRepository;
 import it.unicam.cs.ids.hackhub.repository.RichiestaSupportoRepository;
 import it.unicam.cs.ids.hackhub.repository.TeamRepository;
 import jakarta.transaction.Transactional;
@@ -22,13 +24,15 @@ public class RichiestaSupportoService {
     private final GestoreCallService gestoreCallService;
     private final HackathonRepository hackathonRepository;
     private final TeamRepository teamRepository;
+    private final MembroStaffRepository membroStaffRepository;
 
     @Autowired
-    public RichiestaSupportoService(RichiestaSupportoRepository richiestaSupportoRepository, GestoreCallService gestoreCallService, HackathonRepository hackathonRepository, TeamRepository teamRepository) {
+    public RichiestaSupportoService(RichiestaSupportoRepository richiestaSupportoRepository, GestoreCallService gestoreCallService, HackathonRepository hackathonRepository, TeamRepository teamRepository, MembroStaffRepository membroStaffRepository) {
         this.richiestaSupportoRepository = richiestaSupportoRepository;
         this.gestoreCallService = gestoreCallService;
         this.hackathonRepository = hackathonRepository;
         this.teamRepository = teamRepository;
+        this.membroStaffRepository = membroStaffRepository;
     }
 
     public List<Mentore> ottieniMentoriDisponibili(Long idHackathon) {
@@ -43,11 +47,13 @@ public class RichiestaSupportoService {
     }
 
     @Transactional
-    public RichiestaSupporto creaRichiestaSupporto(Long idTeam, String descrizione){
+    public RichiestaSupporto creaRichiestaSupporto(Long idTeam, RichiestaSupportoDTO richiestaSupportoDTO){
         Team team = teamRepository.findById(idTeam)
                 .orElseThrow(() -> new RuntimeException(("Team non trovato")));
 
-        RichiestaSupporto nuovaRichiesta = new RichiestaSupporto(descrizione, null, null, null);
+        Mentore mentore = membroStaffRepository.getMentoreById(richiestaSupportoDTO.idMentore());
+
+        RichiestaSupporto nuovaRichiesta = new RichiestaSupporto(richiestaSupportoDTO.descrizione(), team, mentore);
 
         return richiestaSupportoRepository.save(nuovaRichiesta);
     }
@@ -74,6 +80,14 @@ public class RichiestaSupportoService {
         return richiestaSupportoRepository.findByMentoreIdAndEvasaFalse(idMentore);
     }
 
+    public List<RichiestaSupporto> getRichiesteTeam(Long idTeam) {
+        if (!teamRepository.existsById(idTeam)) {
+            throw new IllegalArgumentException("Team non trovato con ID: " + idTeam);
+        }
+
+        return richiestaSupportoRepository.findByTeamId(idTeam);
+    }
+
     /**
      * Mostra nel dettaglio i dati di una specifica richiesta di supporto tramite il suo ID.
      * Risponde al punto 4 del flusso del caso d'uso: GestisceRichiestaSupporto.
@@ -88,7 +102,7 @@ public class RichiestaSupportoService {
     }
 
     @Transactional
-    public RichiestaSupporto rispondiERisolviRichiesta(Long idRichiesta, Long idMentore, GestioneSupportoDTO dto) {
+    public void rispondiERisolviRichiesta(Long idRichiesta, Long idMentore, GestioneSupportoDTO gestioneSupportoDTO) {
         RichiestaSupporto richiesta = richiestaSupportoRepository.findById(idRichiesta)
                 .orElseThrow(() -> new RuntimeException("Richiesta non trovata"));
 
@@ -100,15 +114,14 @@ public class RichiestaSupportoService {
             throw new RuntimeException("Questa richiesta è già stata evasa.");
         }
 
-        if (dto.dataCall() != null) {
-            richiesta.setDataCall(dto.dataCall());
-
+        if (gestioneSupportoDTO.dataCall() != null) {
+            richiesta.setDataCall(gestioneSupportoDTO.dataCall());
             this.gestoreCallService.inviaLinkCall(richiesta);
         }
 
-        richiesta.setRispostaMentore((dto.rispostaMentore()));
+        richiesta.setRispostaMentore((gestioneSupportoDTO.rispostaMentore()));
         richiesta.setEvasa(true);
 
-        return richiestaSupportoRepository.save(richiesta);
+        richiestaSupportoRepository.save(richiesta);
     }
 }

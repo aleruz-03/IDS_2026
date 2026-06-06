@@ -11,4 +11,6 @@ public interface RichiestaSupportoRepository extends JpaRepository<RichiestaSupp
     List<RichiestaSupporto> findByMentoreId(Long idMentore);
 
     List<RichiestaSupporto> findByMentoreIdAndEvasaFalse(Long idMentore);
+
+    List<RichiestaSupporto> findByTeamId(Long idTeam);
 }

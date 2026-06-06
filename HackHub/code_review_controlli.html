@@ -1,0 +1,585 @@
+﻿<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HackHub - Review controlli mancanti</title>
+  <style>
+    :root {
+      --ink: #17211b;
+      --muted: #5e6b62;
+      --paper: #fffaf0;
+      --panel: #ffffffcc;
+      --line: #e7dcc4;
+      --accent: #0f766e;
+      --accent-2: #d97706;
+      --danger: #b42318;
+      --warn: #b45309;
+      --ok: #15803d;
+      --shadow: 0 20px 60px rgba(43, 31, 12, .16);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, 'Times New Roman', serif;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(15, 118, 110, .16), transparent 26rem),
+        radial-gradient(circle at 90% 6%, rgba(217, 119, 6, .18), transparent 24rem),
+        linear-gradient(135deg, #fff7e6 0%, #f5efe2 48%, #eaf3ef 100%);
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 56px 24px 32px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border: 1px solid rgba(15, 118, 110, .25);
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(255, 255, 255, .56);
+      font: 700 12px/1.2 Verdana, sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 auto 14px;
+      max-width: 980px;
+      font-size: clamp(36px, 6vw, 76px);
+      line-height: .96;
+      letter-spacing: -.05em;
+    }
+
+    .subtitle {
+      max-width: 820px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: clamp(17px, 2.2vw, 21px);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto 72px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 22px 0 28px;
+    }
+
+    .stat, .card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat {
+      padding: 20px;
+      min-height: 118px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 36px;
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-family: Verdana, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .toc {
+      margin: 28px 0;
+      padding: 20px;
+      border-radius: 24px;
+      border: 1px dashed rgba(15, 118, 110, .32);
+      background: rgba(255, 255, 255, .46);
+    }
+
+    .toc h2 { margin: 0 0 12px; }
+
+    .toc a {
+      display: inline-block;
+      margin: 6px 6px 0 0;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #0b5f59;
+      text-decoration: none;
+      background: rgba(15, 118, 110, .1);
+      font: 700 13px Verdana, sans-serif;
+    }
+
+    .section-title {
+      margin: 46px 0 16px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 2px solid rgba(23, 33, 27, .12);
+      padding-bottom: 10px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -.04em;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font: 700 12px Verdana, sans-serif;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 25px;
+      letter-spacing: -.03em;
+    }
+
+    .path {
+      margin-bottom: 14px;
+      color: var(--muted);
+      font: 12px Consolas, 'Courier New', monospace;
+      word-break: break-word;
+    }
+
+    ul { margin: 12px 0 0; padding-left: 20px; }
+    li { margin: 9px 0; }
+
+    .tag {
+      display: inline-block;
+      margin-right: 7px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: white;
+      font: 700 11px Verdana, sans-serif;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      vertical-align: 1px;
+    }
+
+    .alta { background: var(--danger); }
+    .media { background: var(--warn); }
+    .bassa { background: var(--ok); }
+    .tipo { background: var(--accent); }
+
+    .wide { grid-column: 1 / -1; }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 6px;
+      background: rgba(23, 33, 27, .08);
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: .92em;
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-left: 5px solid var(--accent-2);
+      border-radius: 14px;
+      background: rgba(217, 119, 6, .08);
+      color: #5f370e;
+    }
+
+    footer {
+      margin-top: 34px;
+      color: var(--muted);
+      text-align: center;
+      font: 13px Verdana, sans-serif;
+    }
+
+    @media (max-width: 850px) {
+      .summary, .grid { grid-template-columns: 1fr; }
+      header { padding-top: 38px; }
+      .section-title { align-items: start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">Code review HackHub</div>
+    <h1>Controlli mancanti e miglioramenti consigliati</h1>
+    <p class="subtitle">Analisi pragmatica del progetto Spring Boot: classi controller, service, DTO, model e repository. Focus su bug possibili, validazioni mancanti, consistenza del dominio e qualita' API.</p>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="Sintesi">
+      <div class="stat"><strong>9</strong><span>aree principali</span></div>
+      <div class="stat"><strong>Alta</strong><span>priorita': dati e relazioni</span></div>
+      <div class="stat"><strong>DTO</strong><span>validazione assente</span></div>
+      <div class="stat"><strong>API</strong><span>errori non uniformi</span></div>
+    </section>
+
+    <nav class="toc">
+      <h2>Indice rapido</h2>
+      <a href="#controller">Controller</a>
+      <a href="#service">Service</a>
+      <a href="#dto">DTO</a>
+      <a href="#model">Model</a>
+      <a href="#repository">Repository</a>
+      <a href="#config">Configurazione</a>
+      <a href="#priorita">Priorita'</a>
+    </nav>
+
+    <section id="controller">
+      <div class="section-title"><h2>Controller</h2><span>API, status code, input</span></div>
+      <div class="grid">
+        <article class="card">
+          <h3>HackathonController</h3>
+          <div class="path">controller/HackathonController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Manca autorizzazione su <code>DELETE /elimina/{idHackathon}</code>: chiunque conosca l'id puo' eliminare un hackathon. Controllo consigliato: verificare <code>idOrganizzatore</code> o ruolo admin.</li>
+            <li><span class="tag alta">Alta</span>Le eccezioni del service sono spesso <code>RuntimeException</code>, ma il controller cattura solo <code>IllegalArgumentException</code>/<code>IllegalStateException</code>. Controllo consigliato: usare eccezioni specifiche o un <code>@ControllerAdvice</code>.</li>
+            <li><span class="tag media">Media</span><code>cambiaStato</code> non verifica chi cambia lo stato. Controllo consigliato: solo organizzatore dell'hackathon o admin.</li>
+            <li><span class="tag media">Media</span><code>createHackathon</code> non valida date, premio, campi nulli. Controllo consigliato: <code>@Valid</code> sul DTO e validazioni nel service.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>TeamController</h3>
+          <div class="path">controller/TeamController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>creaTeam</code> riceve il nome come stringa grezza nel body. Controllo consigliato: creare <code>CreazioneTeamDTO</code> con <code>@NotBlank</code> e lunghezza massima.</li>
+            <li><span class="tag media">Media</span><code>getAllTeamsOfHackathon</code> non gestisce hackathon inesistente: puo' causare <code>NullPointerException</code>. Controllo consigliato: <code>findById(...).orElseThrow</code>.</li>
+            <li><span class="tag media">Media</span>Gli endpoint non distinguono tra utente non trovato, team non trovato e hackathon non trovato. Controllo consigliato: messaggi e status code specifici.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>SottomissioneController</h3>
+          <div class="path">controller/SottomissioneController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>valuta</code> e <code>invia</code> dipendono da regole di stato, ma il controller non intercetta tutte le <code>RuntimeException</code>. Controllo consigliato: uniformare le eccezioni a <code>IllegalStateException</code>/<code>IllegalArgumentException</code>.</li>
+            <li><span class="tag media">Media</span><code>getSottomissioneTeam</code> non gestisce assenza sottomissione. Controllo consigliato: restituire <code>404</code> o <code>204 No Content</code>.</li>
+            <li><span class="tag media">Media</span>Manca validazione URL della sottomissione. Controllo consigliato: <code>@NotBlank</code> e <code>@Pattern</code>/<code>@URL</code>.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>SegnalazioneController</h3>
+          <div class="path">controller/SegnalazioneController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>segnalazioneNonFondata</code> elimina senza verificare che <code>idOrganizzatore</code> sia l'organizzatore associato. Controllo consigliato: autorizzazione per organizzatore proprietario.</li>
+            <li><span class="tag alta">Alta</span><code>bannaTeam</code> riceve <code>idHackathon</code> come numero grezzo nel body. Controllo consigliato: usare DTO <code>BannaTeamDTO</code> o path variable esplicita.</li>
+            <li><span class="tag media">Media</span><code>modificaSegnalazione</code> riceve una stringa grezza. Controllo consigliato: DTO con <code>descrizione</code> validata.</li>
+            <li><span class="tag media">Media</span>Le operazioni di gestione segnalazione dovrebbero distinguere: segnalazione inesistente, organizzatore non autorizzato, team non iscritto all'hackathon.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>RichiestaSupportoController</h3>
+          <div class="path">controller/RichiestaSupportoController.java</div>
+          <ul>
+            <li><span class="tag media">Media</span><code>GestioneSupportoDTO.dataCall</code> usa <code>Date</code>: il formato JSON e' fragile. Controllo consigliato: usare <code>LocalDateTime</code> e <code>@JsonFormat</code> o ISO-8601.</li>
+            <li><span class="tag alta">Alta</span><code>creaRichiesta</code> non verifica che il team sia effettivamente in un hackathon in corso e che il mentore sia assegnato a quell'hackathon.</li>
+            <li><span class="tag media">Media</span>Per le liste vuote a volte ritorna stringa invece di lista vuota. Miglioramento: restituire sempre array JSON <code>[]</code> per coerenza API.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>InvitoController</h3>
+          <div class="path">controller/InvitoController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>accettaInvito</code> non verifica se l'invito esiste prima di usarlo. Controllo consigliato: <code>findById</code> con errore 404.</li>
+            <li><span class="tag media">Media</span><code>getInvitiMandati</code> dal nome sembra inviti inviati, ma potrebbe servire anche endpoint per inviti ricevuti. Controllo consigliato: distinguere mittente/destinatario.</li>
+            <li><span class="tag media">Media</span>Manca controllo che chi accetta sia davvero il destinatario dell'invito.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>UtenteController</h3>
+          <div class="path">controller/UtenteController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Restituisce entita' <code>Utente</code> direttamente in <code>getUtenti</code>: espone password. Controllo consigliato: <code>UtenteResponseDTO</code> senza password.</li>
+            <li><span class="tag alta">Alta</span><code>login</code> ritorna solo una stringa, senza sessione/token. Miglioramento: se serve autenticazione reale, introdurre token o almeno un DTO risposta.</li>
+            <li><span class="tag media">Media</span><code>deleteUtente</code> puo' fallire per vincoli con team/inviti. Controllo consigliato: verificare relazioni prima della delete o gestire scollegamento.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>MembroStaffController</h3>
+          <div class="path">controller/MembroStaffController.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Creazione staff salva password in chiaro. Controllo consigliato: hashing, mai restituire password, vincolo email unica.</li>
+            <li><span class="tag media">Media</span>Cattura <code>Exception</code> generica: nasconde bug reali. Miglioramento: eccezioni specifiche e gestione globale.</li>
+            <li><span class="tag media">Media</span>Manca validazione email, nome, cognome e password minima.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="service">
+      <div class="section-title"><h2>Service</h2><span>regole di business</span></div>
+      <div class="grid">
+        <article class="card wide">
+          <h3>HackathonService</h3>
+          <div class="path">service/HackathonService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Molti metodi usano <code>getHackathonById</code>/<code>getTeamById</code>: se non trova, puo' tornare <code>null</code> e generare <code>NullPointerException</code>. Controllo consigliato: usare sempre <code>findById(...).orElseThrow</code>.</li>
+            <li><span class="tag alta">Alta</span><code>createHackathon</code> non verifica coerenza date: scadenza iscrizioni prima dell'inizio, start prima di end, date non passate. Controllo consigliato: validazione temporale completa.</li>
+            <li><span class="tag alta">Alta</span>Non verifica che organizzatore, giudice e mentori siano persone diverse. Controllo consigliato: impedire ruoli sovrapposti nello stesso hackathon.</li>
+            <li><span class="tag alta">Alta</span><code>proclamaVincitore</code> accede a <code>team.getSottomissione().getValutazione()</code> senza controllare se <code>sottomissione</code> e' null. Controllo consigliato: verificare sottomissione esistente per ogni team.</li>
+            <li><span class="tag media">Media</span><code>aggiungiMentore</code> lancia <code>RuntimeException</code> ma il controller cattura <code>IllegalArgumentException</code>. Miglioramento: eccezioni coerenti.</li>
+            <li><span class="tag media">Media</span><code>deleteHackathon</code> e' complesso per via delle relazioni JPA. Miglioramento strutturale: sistemare mapping <code>ManyToMany</code> con un solo owner e <code>mappedBy</code>.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>TeamService</h3>
+          <div class="path">service/TeamService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>iscriviTeam</code> aggiunge due volte lo stesso hackathon al team: c'e' un <code>add</code> dentro l'<code>if</code> e un altro subito dopo. Controllo consigliato: rimuovere il secondo <code>team.getHackathon().add(hackathon)</code>.</li>
+            <li><span class="tag alta">Alta</span>Non salva esplicitamente il team dopo aver modificato <code>team.getHackathon()</code>. Controllo consigliato: salvare entrambi i lati o sistemare il mapping owner.</li>
+            <li><span class="tag media">Media</span><code>creaTeam</code> non controlla nome vuoto/null e creatore inesistente. Controllo consigliato: <code>@NotBlank</code>, <code>findById</code>.</li>
+            <li><span class="tag media">Media</span>Manca limite dimensione team e duplicati partecipanti.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>SottomissioneService</h3>
+          <div class="path">service/SottomissioneService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Non verifica che il team sia iscritto all'hackathon prima di inviare una sottomissione. Controllo consigliato: <code>hackathon.getTeams().contains(team)</code> o query dedicata.</li>
+            <li><span class="tag alta">Alta</span>Non impedisce piu' sottomissioni dello stesso team nello stesso hackathon. Controllo consigliato: vincolo logico o unique constraint.</li>
+            <li><span class="tag media">Media</span><code>valutaSottomissione</code> non controlla voto min/max. Controllo consigliato: es. <code>0 <= voto <= 10</code>.</li>
+            <li><span class="tag media">Media</span>Non impedisce valutazione doppia della stessa sottomissione. Controllo consigliato: se <code>sottomissione.getValutazione() != null</code>, bloccare o aggiornare esplicitamente.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>InvitoService</h3>
+          <div class="path">service/InvitoService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Non verifica che mittente, destinatario e team esistano prima di creare invito. Controllo consigliato: <code>findById</code> con errori specifici.</li>
+            <li><span class="tag alta">Alta</span>Non verifica che il mittente faccia parte del team. Controllo consigliato: solo membro del team puo' invitare.</li>
+            <li><span class="tag media">Media</span>Non impedisce inviti duplicati o invito a utente gia' membro del team.</li>
+            <li><span class="tag media">Media</span><code>accettaInvito</code> dovrebbe essere transazionale: aggiunge partecipante e cancella invito nella stessa operazione.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>RichiestaSupportoService</h3>
+          <div class="path">service/RichiestaSupportoService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>creaRichiestaSupporto</code> non verifica che il team sia in un hackathon <code>IN_CORSO</code>. Controllo consigliato: derivare hackathon dal team e validare stato.</li>
+            <li><span class="tag alta">Alta</span>Non verifica che il mentore richiesto sia assegnato all'hackathon del team.</li>
+            <li><span class="tag media">Media</span>Non limita richieste duplicate aperte dello stesso team verso lo stesso mentore.</li>
+            <li><span class="tag media">Media</span><code>rispondiERisolviRichiesta</code> marca evasa anche se risposta vuota. Controllo consigliato: <code>rispostaMentore</code> obbligatoria o gestione separata per pianificazione call.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>SegnalazioneService</h3>
+          <div class="path">service/SegnalazioneService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>createSegnalazione</code> non verifica che il mentore sia effettivamente assegnato al team/hackathon. Controllo consigliato: validare relazione mentore-hackathon-team.</li>
+            <li><span class="tag alta">Alta</span><code>segnalazioneNonFondata</code> elimina senza controllare organizzatore autorizzato.</li>
+            <li><span class="tag alta">Alta</span><code>bannaTeam</code> dovrebbe verificare: segnalazione esistente, organizzatore corretto, hackathon esistente, team della segnalazione iscritto a quell'hackathon.</li>
+            <li><span class="tag media">Media</span>Uso di <code>remove(hackathon)</code> puo' fallire per istanze diverse. Controllo consigliato: rimuovere per ID o sistemare equals/hashCode.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>UtenteService</h3>
+          <div class="path">service/UtenteService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Password salvate e confrontate in chiaro. Controllo consigliato: <code>PasswordEncoder</code> BCrypt.</li>
+            <li><span class="tag alta">Alta</span>Manca vincolo email unica. Controllo consigliato: unique constraint DB + controllo service.</li>
+            <li><span class="tag media">Media</span><code>createUtente</code> non valida email, password, nome, cognome.</li>
+            <li><span class="tag media">Media</span><code>deleteUtente</code> non gestisce relazioni con team/inviti: possibile errore di vincolo.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>MembroStaffService</h3>
+          <div class="path">service/MembroStaffService.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Stessi problemi utenti: password in chiaro, email non unica, input non validati.</li>
+            <li><span class="tag media">Media</span>Creazione di ruoli separata ma senza controllo che la stessa email non venga registrata come piu' ruoli.</li>
+            <li><span class="tag bassa">Bassa</span>Potresti centralizzare creazione staff per evitare duplicazione tra organizzatore, mentore e giudice.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="dto">
+      <div class="section-title"><h2>DTO</h2><span>validazione e contratti API</span></div>
+      <div class="grid">
+        <article class="card wide">
+          <h3>Tutti i DTO di input</h3>
+          <div class="path">controller/DTO/*.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Manca Bean Validation. Controllo consigliato: aggiungere dipendenza <code>spring-boot-starter-validation</code>, poi usare <code>@Valid</code> nei controller e annotazioni sui DTO.</li>
+            <li><span class="tag tipo">Tipo</span><code>String</code>: <code>@NotBlank</code>, <code>@Size(max=...)</code>. Campi: nome team, descrizione, URL, nome hackathon, email, password.</li>
+            <li><span class="tag tipo">Tipo</span><code>Long id...</code>: <code>@NotNull</code> e controllo esistenza nel service.</li>
+            <li><span class="tag tipo">Tipo</span><code>Date</code>: preferire <code>LocalDate</code>/<code>LocalDateTime</code>, usare formato ISO e validazioni <code>@Future</code>/<code>@FutureOrPresent</code>.</li>
+            <li><span class="tag tipo">Tipo</span><code>double premioInDenaro</code>: usare <code>BigDecimal</code> o almeno <code>@PositiveOrZero</code>.</li>
+            <li><span class="tag media">Media</span><code>BannaTeamDTO</code> esiste ma il controller non lo usa. Miglioramento: usarlo o rimuoverlo.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Response DTO</h3>
+          <div class="path">HackathonResponseDTO, TeamResponseDTO, ecc.</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>HackathonResponseDTO</code> include <code>Team teamVincitore</code> come entita'. Controllo consigliato: usare <code>TeamResponseDTO</code> o solo nome/id.</li>
+            <li><span class="tag alta">Alta</span><code>TeamResponseDTO</code> include <code>List&lt;Utente&gt;</code>: espone password degli utenti. Controllo consigliato: <code>UtenteResponseDTO</code>.</li>
+            <li><span class="tag media">Media</span>Alcuni DTO possono generare query profonde per relazioni annidate. Miglioramento: response piu' piatte e query dedicate.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>DTO mancanti</h3>
+          <div class="path">nuovi DTO consigliati</div>
+          <ul>
+            <li><span class="tag media">Media</span><code>CreazioneTeamDTO</code> per evitare body stringa grezzo.</li>
+            <li><span class="tag media">Media</span><code>ModificaSegnalazioneDTO</code> per descrizione validata.</li>
+            <li><span class="tag media">Media</span><code>UtenteResponseDTO</code> per non esporre password.</li>
+            <li><span class="tag media">Media</span><code>ErroreResponseDTO</code> comune per errori API.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="model">
+      <div class="section-title"><h2>Model</h2><span>JPA e dominio</span></div>
+      <div class="grid">
+        <article class="card">
+          <h3>Hackathon</h3>
+          <div class="path">model/Hackathon.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Relazione <code>ManyToMany</code> con <code>Team</code> non e' definita con owner unico. Controllo consigliato: usare <code>mappedBy</code> su un lato.</li>
+            <li><span class="tag media">Media</span>Le liste <code>mentori</code> e <code>teams</code> non sono inizializzate nel costruttore vuoto. Controllo consigliato: inizializzarle a <code>new ArrayList&lt;&gt;()</code>.</li>
+            <li><span class="tag media">Media</span>Manca <code>equals/hashCode</code> basato su ID: <code>contains/remove</code> su entita' JPA puo' fallire.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Team</h3>
+          <div class="path">model/Team.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span><code>List&lt;Hackathon&gt; hackathon</code> dovrebbe essere pluralizzato e mappato correttamente. Miglioramento: <code>hackathons</code> + join table unica.</li>
+            <li><span class="tag media">Media</span><code>partecipanti</code> non inizializzata nel costruttore vuoto. Rischio <code>NullPointerException</code>.</li>
+            <li><span class="tag media">Media</span><code>@OneToOne Sottomissione</code> limita un team a una sola sottomissione totale, anche se partecipa a piu' hackathon. Modello consigliato: <code>Sottomissione</code> legata a coppia team-hackathon, senza campo unico sul team.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Utente e MembroDelloStaff</h3>
+          <div class="path">model/Utente.java, model/MembroDelloStaff.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Password nei model e nelle response potenzialmente serializzabili. Controllo consigliato: non esporre entity direttamente, aggiungere <code>@JsonIgnore</code> se necessario.</li>
+            <li><span class="tag alta">Alta</span>Email senza vincolo unique. Controllo consigliato: <code>@Column(unique = true, nullable = false)</code>.</li>
+            <li><span class="tag media">Media</span><code>setId</code> in <code>MembroDelloStaff</code> e' vuoto: puo' confondere framework/test. Meglio rimuoverlo o implementarlo correttamente se serve.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Sottomissione e Valutazione</h3>
+          <div class="path">model/Sottomissione.java, model/Valutazione.java</div>
+          <ul>
+            <li><span class="tag media">Media</span>Relazione <code>OneToOne</code> bidirezionale non dichiarata con owner chiaro. Controllo consigliato: definire <code>mappedBy</code> o semplificare.</li>
+            <li><span class="tag media">Media</span>Manca vincolo sul voto. Controllo consigliato: <code>@Min(0)</code>, <code>@Max(10)</code>.</li>
+            <li><span class="tag media">Media</span>Manca vincolo URL non nullo/valido.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="repository">
+      <div class="section-title"><h2>Repository</h2><span>query e null safety</span></div>
+      <div class="grid">
+        <article class="card wide">
+          <h3>Metodi get...ById</h3>
+          <div class="path">repository/*.java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Metodi come <code>getTeamById</code>, <code>getHackathonById</code>, <code>getInvitoById</code> possono produrre null o proxy problematici. Controllo consigliato: preferire <code>Optional&lt;T&gt; findById(...)</code> nei service.</li>
+            <li><span class="tag media">Media</span><code>SegnalazioneRepository.getSegnalazioneById(Long idOrganizzatore)</code> ha parametro nominato male. Miglioramento: rinominare in <code>idSegnalazione</code> o rimuovere il metodo e usare <code>findById</code>.</li>
+            <li><span class="tag media">Media</span>Aggiungere query mirate per evitare caricamenti profondi: es. solo DTO projection per liste.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="config">
+      <div class="section-title"><h2>Configurazione</h2><span>ambiente e test</span></div>
+      <div class="grid">
+        <article class="card">
+          <h3>application.properties</h3>
+          <div class="path">src/main/resources/application.properties</div>
+          <ul>
+            <li><span class="tag media">Media</span><code>ddl-auto=create-drop</code> cancella i dati a ogni restart. Va bene per demo/test, non per sviluppo persistente. Controllo consigliato: profili separati <code>dev</code>/<code>test</code>.</li>
+            <li><span class="tag media">Media</span><code>show-sql=true</code> e logging web DEBUG generano log enormi. Miglioramento: disattivare in profilo normale.</li>
+            <li><span class="tag bassa">Bassa</span>H2 console attiva: ok in locale, da disabilitare fuori da sviluppo.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Test</h3>
+          <div class="path">src/test/java</div>
+          <ul>
+            <li><span class="tag alta">Alta</span>Mancano test dei casi d'uso principali: iscrizione team, sottomissione, valutazione, segnalazione, delete hackathon.</li>
+            <li><span class="tag media">Media</span>Aggiungere test per controlli negativi: ID inesistenti, ruoli non autorizzati, stati hackathon non validi.</li>
+            <li><span class="tag media">Media</span>Aggiungere test di serializzazione DTO per evitare cicli JSON e password esposte.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="priorita">
+      <div class="section-title"><h2>Priorita' operative</h2><span>ordine consigliato</span></div>
+      <div class="grid">
+        <article class="card wide">
+          <h3>Roadmap tecnica</h3>
+          <ul>
+            <li><span class="tag alta">Alta</span>1. Introdurre DTO di input validati con <code>@Valid</code> e <code>spring-boot-starter-validation</code>.</li>
+            <li><span class="tag alta">Alta</span>2. Sostituire gli endpoint che restituiscono entity con ResponseDTO sicuri, soprattutto utenti e team.</li>
+            <li><span class="tag alta">Alta</span>3. Uniformare eccezioni e status code con un <code>@RestControllerAdvice</code>.</li>
+            <li><span class="tag alta">Alta</span>4. Sistemare mapping JPA <code>Team-Hackathon</code> con owner unico e rimuovere duplicazioni.</li>
+            <li><span class="tag media">Media</span>5. Aggiungere controlli di autorizzazione applicativa: organizzatore, mentore, giudice, membro team.</li>
+            <li><span class="tag media">Media</span>6. Aggiungere test di integrazione sui flussi core.</li>
+          </ul>
+          <div class="note">Nota: le priorita' sono ordinate per rischio di bug reali e perdita/coerenza dati, non per estetica del codice.</div>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      Report generato per HackHub. Apri questo file nel browser per consultarlo durante il refactor.
+    </footer>
+  </main>
+</body>
+</html>
