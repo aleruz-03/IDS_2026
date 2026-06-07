@@ -2,6 +2,9 @@ package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.SottomissioneDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ValutazioneDTO;
+import it.unicam.cs.ids.hackhub.exception.ConflictException;
+import it.unicam.cs.ids.hackhub.exception.ForbiddenOperationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.*;
 import it.unicam.cs.ids.hackhub.repository.*;
 import jakarta.transaction.Transactional;
@@ -37,10 +40,10 @@ public class SottomissioneService {
     @Transactional
     public Sottomissione createSottomissione(SottomissioneDTO sottomissioneDTO){
         Team team = teamRepository.findById(sottomissioneDTO.idTeam())
-                .orElseThrow(() -> new RuntimeException("Team non trovato con ID: " + sottomissioneDTO.idTeam()));
+                .orElseThrow(() -> new ResourceNotFoundException("Team non trovato con ID: " + sottomissioneDTO.idTeam()));
 
         Hackathon hackathon = hackathonRepository.findById(sottomissioneDTO.idHackathon())
-                .orElseThrow(() -> new RuntimeException("Hackathon non trovato con ID: " +  sottomissioneDTO.idHackathon()));
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato con ID: " +  sottomissioneDTO.idHackathon()));
 
         Sottomissione sottomissione = new Sottomissione(
                 new Date(),
@@ -51,7 +54,7 @@ public class SottomissioneService {
         );
 
         if(hackathon.getStato() != StatoHackathon.IN_CORSO){
-            throw  new RuntimeException("Hackathon non in corso");
+            throw new ConflictException("Hackathon non in corso");
         }
 
         hackathon.aggiungiSottomissione(sottomissione);
@@ -64,13 +67,13 @@ public class SottomissioneService {
     @Transactional
     public Sottomissione aggiornaSottomissione(Long idSottomissione, SottomissioneDTO dto){
         Sottomissione sottomissione = sottomissioneRepository.findById(idSottomissione)
-                .orElseThrow(() -> new RuntimeException("Sottomissione non trovata con ID: " + idSottomissione));
+                .orElseThrow(() -> new ResourceNotFoundException("Sottomissione non trovata con ID: " + idSottomissione));
 
 
         Hackathon hackathon = sottomissione.getHackathon();
 
         if(hackathon.getStato() != StatoHackathon.IN_CORSO){
-            throw  new RuntimeException("Hackathon non in corso");
+            throw new ConflictException("Hackathon non in corso");
         }
 
         sottomissione.setUrl(dto.url() != null ? dto.url() : sottomissione.getUrl());
@@ -84,16 +87,16 @@ public class SottomissioneService {
 
     public Valutazione valutaSottomissione(Long idGiudice, ValutazioneDTO valutazioneDTO) {
         Sottomissione sottomissione = sottomissioneRepository.findById(valutazioneDTO.idSottomissione())
-                .orElseThrow(() -> new RuntimeException("Sottomissione non trovata"));
+                .orElseThrow(() -> new ResourceNotFoundException("Sottomissione non trovata"));
 
         Hackathon hackathon = sottomissione.getHackathon();
 
         if(hackathon.getStato() != StatoHackathon.IN_VALUTAZIONE){
-            throw new RuntimeException("Hackaton non in fase di valutazione");
+            throw new ConflictException("Hackathon non in fase di valutazione");
         }
 
         if (!hackathon.getGiudice().getId().equals(idGiudice)) {
-            throw new RuntimeException("Giudice non assegnato all'Hackathon corrispondente alla sottomissione");
+            throw new ForbiddenOperationException("Giudice non assegnato all'Hackathon corrispondente alla sottomissione");
         }
 
         hackathon.valutaSottomissione();
@@ -114,8 +117,11 @@ public class SottomissioneService {
     }
 
     public Sottomissione getSottomissioneOfTeam(Long idTeam) {
-        Team team = teamRepository.findById(idTeam).orElseThrow(() -> new RuntimeException("Team non trovata"));
+        Team team = teamRepository.findById(idTeam).orElseThrow(() -> new ResourceNotFoundException("Team non trovato"));
         Sottomissione sottomissione = sottomissioneRepository.getSottomissioneByTeam(team);
+        if (sottomissione == null) {
+            throw new ResourceNotFoundException("Sottomissione non trovata per il team con ID: " + idTeam);
+        }
         return sottomissione;
     }
 }

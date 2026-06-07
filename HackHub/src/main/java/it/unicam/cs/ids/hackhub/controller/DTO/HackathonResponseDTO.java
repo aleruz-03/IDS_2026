@@ -17,7 +17,7 @@ public record HackathonResponseDTO(
         LocationResponseDTO location,
         double premioInDenaro,
         List<TeamResponseDTO> teams,
-        Team teamVincitore,
+        TeamResponseDTO teamVincitore,
         MembroStaffResponseDTO organizzatore,
         MembroStaffResponseDTO giudice,
         List<MembroStaffResponseDTO> mentori,
@@ -36,6 +36,10 @@ public record HackathonResponseDTO(
                 .map(TeamResponseDTO::fromTeam)
                 .toList();
 
+        TeamResponseDTO teamVincitore = hackathon.getTeamVincitore() == null
+                ? null
+                : TeamResponseDTO.fromTeam(hackathon.getTeamVincitore());
+
         return new HackathonResponseDTO(
                 hackathon.getId(),
                 hackathon.getName(),
@@ -46,7 +50,7 @@ public record HackathonResponseDTO(
                 LocationResponseDTO.fromLocation(hackathon.getLocation()),
                 hackathon.getPremioInDenaro(),
                 teams,
-                hackathon.getTeamVincitore(),
+                teamVincitore,
                 MembroStaffResponseDTO.fromMembroStaff(hackathon.getOrganizzatore()),
                 MembroStaffResponseDTO.fromMembroStaff(hackathon.getGiudice()),
                 mentori,

@@ -3,6 +3,10 @@ package it.unicam.cs.ids.hackhub.service;
 import it.unicam.cs.ids.hackhub.controller.DTO.AggiungiMentoreDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.ModificaHackathonDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.creazioneHackathonDTO;
+import it.unicam.cs.ids.hackhub.exception.ConflictException;
+import it.unicam.cs.ids.hackhub.exception.ExternalServiceException;
+import it.unicam.cs.ids.hackhub.exception.ForbiddenOperationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.*;
 import it.unicam.cs.ids.hackhub.model.state.Concluso;
 import it.unicam.cs.ids.hackhub.model.state.InCorso;
@@ -76,28 +80,28 @@ public class HackathonService {
         return hackathonRepository.save(hackathon);
     }
 
-    public Hackathon aggiungiMentoreAllHackthon(Long idOrganizzatore, AggiungiMentoreDTO amdto){
-        Hackathon hackathon = hackathonRepository.findById(amdto.idHackathon())
-                .orElseThrow(() -> new RuntimeException("Hackathon non trovato con ID: "+ amdto.idHackathon()));
+    public void aggiungiMentoreAllHackathon(Long idOrganizzatore, AggiungiMentoreDTO aggiungiMentoreDTO){
+        Hackathon hackathon = hackathonRepository.findById(aggiungiMentoreDTO.idHackathon())
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato con ID: "+ aggiungiMentoreDTO.idHackathon()));
 
-        Mentore mentore = (Mentore) membroStaffRepository.findById(amdto.idMentore())
-                .orElseThrow(() -> new RuntimeException("Mentore inesistente con ID: "+ amdto.idMentore()));
+        Mentore mentore = (Mentore) membroStaffRepository.findById(aggiungiMentoreDTO.idMentore())
+                .orElseThrow(() -> new ResourceNotFoundException("Mentore inesistente con ID: "+ aggiungiMentoreDTO.idMentore()));
 
         if(hackathon.getMentori().contains(mentore)){
-            throw new RuntimeException("Il mentore è già stato inserito in questo hackathon");
+            throw new ConflictException("Il mentore e' gia' stato inserito in questo hackathon");
         }
 
         if(!hackathon.getOrganizzatore().getId().equals(idOrganizzatore)){
-            throw new RuntimeException("Non è l'organizzatore dell'hackathon");
+            throw new ForbiddenOperationException("Non e' l'organizzatore dell'hackathon");
         }
 
         hackathon.getMentori().add(mentore);
-        return hackathonRepository.save(hackathon);
+        hackathonRepository.save(hackathon);
     }
 
     private <T extends MembroDelloStaff> T getMembroStaff(Long id, Class<T> tipoMembroStaff) {
         MembroDelloStaff membroDelloStaff = membroStaffRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Membro dello staff non trovato con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Membro dello staff non trovato con id: " + id));
 
         if (!tipoMembroStaff.isInstance(membroDelloStaff)) {
             throw new IllegalArgumentException("Il membro dello staff con id " + id + " non e' un " + tipoMembroStaff.getSimpleName());
@@ -106,22 +110,22 @@ public class HackathonService {
         return tipoMembroStaff.cast(membroDelloStaff);
     }
 
-    public Hackathon modificaHackathon(Long idOrganizzatore, Long idHackathon, ModificaHackathonDTO dto){
+    public void modificaHackathon(Long idOrganizzatore, Long idHackathon, ModificaHackathonDTO modificaHackathonDTO){
         Hackathon hackathon = hackathonRepository.findById(idHackathon)
-                .orElseThrow(() -> new RuntimeException("Hackathon non trovato con ID: " + idHackathon));
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon));
         if(!hackathon.getOrganizzatore().getId().equals(idOrganizzatore)){
-            throw new RuntimeException("Non è l'organizzatore dell'hackathon");
+            throw new ForbiddenOperationException("Non e' l'organizzatore dell'hackathon");
         }
 
-        hackathon.setName(dto.name() != null ? dto.name() : hackathon.getName());
-        hackathon.setDescription(dto.description() != null ? dto.description() : hackathon.getDescription());
-        hackathon.setScandezaIscrizioni(dto.scadenzaIscrizioni() != null ? dto.scadenzaIscrizioni() : hackathon.getScandezaIscrizioni());
-        hackathon.setData_Start(dto.start() != null ? dto.start() : hackathon.getData_Start());
-        hackathon.setEnd(dto.end() != null ? dto.end() : hackathon.getData_End());
-        hackathon.setLocation(dto.location() != null ? dto.location() : hackathon.getLocation());
-        hackathon.setPremioInDenaro(dto.premioInDenaro() != null ? dto.premioInDenaro() : hackathon.getPremioInDenaro());
+        hackathon.setName(modificaHackathonDTO.name() != null ? modificaHackathonDTO.name() : hackathon.getName());
+        hackathon.setDescription(modificaHackathonDTO.description() != null ? modificaHackathonDTO.description() : hackathon.getDescription());
+        hackathon.setScandezaIscrizioni(modificaHackathonDTO.scadenzaIscrizioni() != null ? modificaHackathonDTO.scadenzaIscrizioni() : hackathon.getScandezaIscrizioni());
+        hackathon.setData_Start(modificaHackathonDTO.start() != null ? modificaHackathonDTO.start() : hackathon.getData_Start());
+        hackathon.setEnd(modificaHackathonDTO.end() != null ? modificaHackathonDTO.end() : hackathon.getData_End());
+        hackathon.setLocation(modificaHackathonDTO.location() != null ? modificaHackathonDTO.location() : hackathon.getLocation());
+        hackathon.setPremioInDenaro(modificaHackathonDTO.premioInDenaro() != null ? modificaHackathonDTO.premioInDenaro() : hackathon.getPremioInDenaro());
 
-        return hackathonRepository.save(hackathon);
+        hackathonRepository.save(hackathon);
     }
 
 
@@ -129,25 +133,32 @@ public class HackathonService {
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
         Team team = teamRepository.getTeamById(idTeam);
 
+        if (hackathon == null) {
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
+        if (team == null) {
+            throw new ResourceNotFoundException("Team non trovato con ID: " + idTeam);
+        }
+
         if(!hackathon.getOrganizzatore().getId().equals(idOrganizzatore)){
-            throw new RuntimeException("Non è l'organizzatore dell'hackathon selezionato");
+            throw new ForbiddenOperationException("Non e' l'organizzatore dell'hackathon selezionato");
         }
 
         if(hackathon.getStato() != StatoHackathon.IN_VALUTAZIONE){
-            throw  new  RuntimeException("Hackathon non in fase di valutazione");
+            throw new ConflictException("Hackathon non in fase di valutazione");
         }
         if(!hackathon.getTeams().contains(team)){
-            throw  new  RuntimeException("Team non iscritto all'hackathon selezionato");
+            throw new ConflictException("Team non iscritto all'hackathon selezionato");
         }
 
         if(!checkSottomissioniValutate(hackathon)){
-            throw new RuntimeException("Non tutte le sottomissioni sono state valuate dal giudice");
+            throw new ConflictException("Non tutte le sottomissioni sono state valutate dal giudice");
         }
 
         boolean pagamentoRiuscito = sistemaPagamentoAdapter.erogaPremio(hackathon,team);
 
         if (!pagamentoRiuscito) {
-            throw new RuntimeException("Errore durante l'erogazione del premio");
+            throw new ExternalServiceException("Errore durante l'erogazione del premio");
         }
 
         hackathon.setTeamVincitore(team);
@@ -167,6 +178,9 @@ public class HackathonService {
 
     public Hackathon cambiaStato(Long idHackathon, StatoHackathon stato){
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        if (hackathon == null) {
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
 
         switch (stato) {
             case ISCRIZIONE -> hackathon.cambiaStato(new InIscrizione());
@@ -180,10 +194,14 @@ public class HackathonService {
 
 
     @Transactional
-    public boolean deleteHackathon(Long idHackathon) {
-        Hackathon hackathon = hackathonRepository.findById(idHackathon).orElse(null);
+    public boolean deleteHackathon(Long idHackathon, Long idOrganizzatore) {
+        Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
         if (hackathon == null) {
-            return false;
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
+
+        if(!hackathon.getOrganizzatore().getId().equals(idOrganizzatore)){
+            throw new ForbiddenOperationException("Questo utente non e' autorizzato a cancellare l'hackathon selezionato");
         }
 
         List<Team> teams = hackathon.getTeams() == null ? new ArrayList<>() : new ArrayList<>(hackathon.getTeams());

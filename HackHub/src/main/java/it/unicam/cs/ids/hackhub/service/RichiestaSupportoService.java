@@ -2,6 +2,9 @@ package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.GestioneSupportoDTO;
 import it.unicam.cs.ids.hackhub.controller.DTO.RichiestaSupportoDTO;
+import it.unicam.cs.ids.hackhub.exception.ConflictException;
+import it.unicam.cs.ids.hackhub.exception.ForbiddenOperationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.Hackathon;
 import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.StatoHackathon;
@@ -37,10 +40,10 @@ public class RichiestaSupportoService {
 
     public List<Mentore> ottieniMentoriDisponibili(Long idHackathon) {
         Hackathon hackathon = hackathonRepository.findById(idHackathon)
-                .orElseThrow(() -> new RuntimeException(("Hackathon non trovato")));
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
 
         if (hackathon.getStato() != StatoHackathon.IN_CORSO) {
-            throw new IllegalStateException("Impossibile richiedere supporto: l'hackathon non è in corso");
+            throw new ConflictException("Impossibile richiedere supporto: l'hackathon non e' in corso");
         }
 
         return hackathon.getMentori();
@@ -49,9 +52,12 @@ public class RichiestaSupportoService {
     @Transactional
     public RichiestaSupporto creaRichiestaSupporto(Long idTeam, RichiestaSupportoDTO richiestaSupportoDTO){
         Team team = teamRepository.findById(idTeam)
-                .orElseThrow(() -> new RuntimeException(("Team non trovato")));
+                .orElseThrow(() -> new ResourceNotFoundException("Team non trovato"));
 
         Mentore mentore = membroStaffRepository.getMentoreById(richiestaSupportoDTO.idMentore());
+        if (mentore == null) {
+            throw new ResourceNotFoundException("Mentore non trovato con ID: " + richiestaSupportoDTO.idMentore());
+        }
 
         RichiestaSupporto nuovaRichiesta = new RichiestaSupporto(richiestaSupportoDTO.descrizione(), team, mentore);
 
@@ -82,7 +88,7 @@ public class RichiestaSupportoService {
 
     public List<RichiestaSupporto> getRichiesteTeam(Long idTeam) {
         if (!teamRepository.existsById(idTeam)) {
-            throw new IllegalArgumentException("Team non trovato con ID: " + idTeam);
+            throw new ResourceNotFoundException("Team non trovato con ID: " + idTeam);
         }
 
         return richiestaSupportoRepository.findByTeamId(idTeam);
@@ -98,20 +104,20 @@ public class RichiestaSupportoService {
      */
     public RichiestaSupporto getDettaglioRichiesta(Long idRichiesta){
         return richiestaSupportoRepository.findById(idRichiesta)
-                .orElseThrow(() -> new RuntimeException(("Richiesta di supporto non trovata con ID: " + idRichiesta)));
+                .orElseThrow(() -> new ResourceNotFoundException("Richiesta di supporto non trovata con ID: " + idRichiesta));
     }
 
     @Transactional
     public void rispondiERisolviRichiesta(Long idRichiesta, Long idMentore, GestioneSupportoDTO gestioneSupportoDTO) {
         RichiestaSupporto richiesta = richiestaSupportoRepository.findById(idRichiesta)
-                .orElseThrow(() -> new RuntimeException("Richiesta non trovata"));
+                .orElseThrow(() -> new ResourceNotFoundException("Richiesta non trovata"));
 
         if(!richiesta.getMentore().getId().equals(idMentore)){
-            throw  new RuntimeException("Operazione negata: non sei il mentore incaricato di questa richiesta!");
+            throw new ForbiddenOperationException("Operazione negata: non sei il mentore incaricato di questa richiesta!");
         }
 
         if (richiesta.isEvasa()) {
-            throw new RuntimeException("Questa richiesta è già stata evasa.");
+            throw new ConflictException("Questa richiesta e' gia' stata evasa.");
         }
 
         if (gestioneSupportoDTO.dataCall() != null) {

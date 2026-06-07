@@ -1,6 +1,8 @@
 package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.SegnalazioneDTO;
+import it.unicam.cs.ids.hackhub.exception.ForbiddenOperationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.*;
 import it.unicam.cs.ids.hackhub.repository.HackathonRepository;
 import it.unicam.cs.ids.hackhub.repository.MembroStaffRepository;
@@ -42,18 +44,23 @@ public class SegnalazioneService {
     }
 
     public Segnalazione getSegnalazioneById(Long idSegnalazione){
-        return segnalazioneRepository.findById(idSegnalazione).orElseThrow(()-> new RuntimeException((
-                "Segnalazione non trovata con ID: " + idSegnalazione
-                )));
+        return segnalazioneRepository.findById(idSegnalazione)
+                .orElseThrow(() -> new ResourceNotFoundException("Segnalazione non trovata con ID: " + idSegnalazione));
     }
 
     @Transactional
     public void createSegnalazione(Long idMentore, SegnalazioneDTO segnalazioneDTO) {
         Team team = teamRepository.findById(segnalazioneDTO.idTeam())
-                .orElseThrow(() -> new RuntimeException("Team non trovato con ID: " + segnalazioneDTO.idTeam()));
+                .orElseThrow(() -> new ResourceNotFoundException("Team non trovato con ID: " + segnalazioneDTO.idTeam()));
 
         Mentore mentore = membroStaffRepository.getMentoreById(idMentore);
         Organizzatore organizzatore = membroStaffRepository.getOrganizzatoreById(segnalazioneDTO.idOrganizzatore());
+        if (mentore == null) {
+            throw new ResourceNotFoundException("Mentore non trovato con ID: " + idMentore);
+        }
+        if (organizzatore == null) {
+            throw new ResourceNotFoundException("Organizzatore non trovato con ID: " + segnalazioneDTO.idOrganizzatore());
+        }
 
         Segnalazione segnalazione = new Segnalazione(
                 segnalazioneDTO.descrizione(),
@@ -77,19 +84,34 @@ public class SegnalazioneService {
     @Transactional
     public void eliminaSegnalazione(Long idSegnalazione){
         if (!segnalazioneRepository.existsById(idSegnalazione)) {
-            throw new RuntimeException(("Impossibile eliminare: segnalazione non trovata con ID: " + idSegnalazione));
+            throw new ResourceNotFoundException("Impossibile eliminare: segnalazione non trovata con ID: " + idSegnalazione);
         }
 
         segnalazioneRepository.deleteById(idSegnalazione);
     }
 
     public void segnalazioneNonFondata(Long idSegnalazione, Long idOrganizzatore) {
+        Segnalazione segnalazione = getSegnalazioneById(idSegnalazione);
+        if (!segnalazione.getOrganizzatore().getId().equals(idOrganizzatore)) {
+            throw new ForbiddenOperationException("Operazione negata: non sei l'organizzatore associato alla segnalazione");
+        }
         segnalazioneRepository.deleteById(idSegnalazione);
     }
 
     public void bannaTeam(Long idSegnalazione, Long idOrganizzatore, Long idHackathon) {
-        Team team = segnalazioneRepository.getSegnalazioneById(idSegnalazione).getTeam();
+        Segnalazione segnalazione = getSegnalazioneById(idSegnalazione);
+        if (!segnalazione.getOrganizzatore().getId().equals(idOrganizzatore)) {
+            throw new ForbiddenOperationException("Operazione negata: non sei l'organizzatore associato alla segnalazione");
+        }
+
+        Team team = segnalazione.getTeam();
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        if (team == null) {
+            throw new ResourceNotFoundException("Segnalazione non trovata con ID: " + idSegnalazione);
+        }
+        if (hackathon == null) {
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
 
         hackathon.getTeams().remove(team);
         hackathonRepository.save(hackathon);

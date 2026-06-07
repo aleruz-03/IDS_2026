@@ -7,7 +7,6 @@ public record AllValutazioniDTO(
         int voto,
         String descrizione,
         SottomissioneResponseDTO sottomissione,
-        TeamResponseDTO team,
         MembroStaffResponseDTO giudice
 ) {
 
@@ -16,16 +15,11 @@ public record AllValutazioniDTO(
                 ? null
                 : SottomissioneResponseDTO.fromSottomissione(valutazione.getSottomissione());
 
-        TeamResponseDTO team = valutazione.getSottomissione() == null || valutazione.getSottomissione().getTeam() == null
-                ? null
-                : TeamResponseDTO.fromTeam(valutazione.getSottomissione().getTeam());
-
         return new AllValutazioniDTO(
                 valutazione.getId(),
                 valutazione.getVoto(),
                 valutazione.getDescrizione(),
                 sottomissione,
-                team,
                 MembroStaffResponseDTO.fromMembroStaff(valutazione.getGiudice())
         );
     }

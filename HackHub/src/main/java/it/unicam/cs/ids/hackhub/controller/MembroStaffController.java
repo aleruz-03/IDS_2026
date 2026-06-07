@@ -6,6 +6,7 @@ import it.unicam.cs.ids.hackhub.model.Mentore;
 import it.unicam.cs.ids.hackhub.model.Organizzatore;
 import it.unicam.cs.ids.hackhub.service.MembroStaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,38 +25,19 @@ public class MembroStaffController {
 
     @PostMapping("/organizzatore")
     public ResponseEntity<String> createOrganizzatore(@RequestBody CreazioneMembroStaffDTO organizzatoreDTO) {
-        try {
-            Organizzatore organizzatore = membroStaffService.createOrganizzatore(organizzatoreDTO);
-            return ResponseEntity.status(201).body("Organizzatore creato con successo! ID assegnato: " + organizzatore.getId());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nella creazione dell'organizzatore: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
-        }
+        Organizzatore organizzatore = membroStaffService.createOrganizzatore(organizzatoreDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Organizzatore creato con successo! ID assegnato: " + organizzatore.getId());
     }
 
     @PostMapping("/mentore")
     public ResponseEntity<String> createMentore(@RequestBody CreazioneMembroStaffDTO mentoreDTO) {
-        try {
-            Mentore mentore = membroStaffService.createMentore(mentoreDTO);
-            return ResponseEntity.status(201).body("Mentore creato con successo! ID assegnato: " + mentore.getId());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nella creazione del mentore: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
-        }
+        Mentore mentore = membroStaffService.createMentore(mentoreDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Mentore creato con successo! ID assegnato: " + mentore.getId());
     }
 
     @PostMapping("/giudice")
     public ResponseEntity<String> createGiudice(@RequestBody CreazioneMembroStaffDTO giudiceDTO) {
-        try {
-            Giudice giudice = membroStaffService.createGiudice(giudiceDTO);
-            return ResponseEntity.status(201).body("Giudice creato con successo! ID assegnato: " + giudice.getId());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nella creazione del giudice: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body("Richiesta non valida: " + e.getMessage());
-        }
+        Giudice giudice = membroStaffService.createGiudice(giudiceDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Giudice creato con successo! ID assegnato: " + giudice.getId());
     }
-
 }

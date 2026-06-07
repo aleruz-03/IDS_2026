@@ -1,6 +1,9 @@
 package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.HackathonResponseDTO;
+import it.unicam.cs.ids.hackhub.exception.ConflictException;
+import it.unicam.cs.ids.hackhub.exception.ForbiddenOperationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.Hackathon;
 import it.unicam.cs.ids.hackhub.model.StatoHackathon;
 import it.unicam.cs.ids.hackhub.model.Team;
@@ -33,7 +36,11 @@ public class TeamService {
     public Team creaTeam(String name, Long idCreatore){
         Team newTeam = new Team(name.trim());
         List<Utente> partecipanti = new ArrayList<>();
-        partecipanti.add(utenteRepository.getUtenteById(idCreatore));
+        Utente creatore = utenteRepository.getUtenteById(idCreatore);
+        if (creatore == null) {
+            throw new ResourceNotFoundException("Utente non trovato con ID: " + idCreatore);
+        }
+        partecipanti.add(creatore);
         newTeam.setPartecipanti(partecipanti);
         return teamRepository.save(newTeam);
     }
@@ -47,20 +54,30 @@ public class TeamService {
         Utente utente = utenteRepository.getUtenteById(idUtente);
         Team team = teamRepository.getTeamById(idTeam);
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        if (utente == null) {
+            throw new ResourceNotFoundException("Utente non trovato con ID: " + idUtente);
+        }
+        if (team == null) {
+            throw new ResourceNotFoundException("Team non trovato con ID: " + idTeam);
+        }
+        if (hackathon == null) {
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
 
         if(hackathon.getStato() != StatoHackathon.ISCRIZIONE){
-            throw new RuntimeException("Le iscrizioni all'hackathon selezionato sono concluse");
+            throw new ConflictException("Le iscrizioni all'hackathon selezionato sono concluse");
         }
 
         if(!team.getPartecipanti().contains(utente)){
-            throw new RuntimeException("Operazione non consentita: non fai parte di questo team!");
+            throw new ForbiddenOperationException("Operazione non consentita: non fai parte di questo team!");
         }
+
+        if(team.getHackathon().contains(hackathon)){
+            throw new ForbiddenOperationException("Team già iscritto a questo hackathon");
+        }
+
 
         hackathon.iscriviTeam(team);
-
-        if(!team.getHackathon().contains(hackathon)){
-            team.getHackathon().add(hackathon);
-        }
 
         team.getHackathon().add(hackathon);
         
@@ -70,6 +87,9 @@ public class TeamService {
 
     public List<Team> getAllTeamsOfHackathon(Long idHackathon) {
         Hackathon hackathon = hackathonRepository.getHackathonById(idHackathon);
+        if (hackathon == null) {
+            throw new ResourceNotFoundException("Hackathon non trovato con ID: " + idHackathon);
+        }
         return hackathon.getTeams();
     }
 }

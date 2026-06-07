@@ -1,5 +1,6 @@
 package it.unicam.cs.ids.hackhub.service;
 
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.Invito;
 import it.unicam.cs.ids.hackhub.model.Team;
 import it.unicam.cs.ids.hackhub.model.Utente;
@@ -31,6 +32,15 @@ public class InvitoService {
         Utente mittente = utenteRepository.getUtenteById(idMittente);
         Utente destinatario = utenteRepository.getUtenteById(idDestinatario);
         Team team = teamRepository.getTeamById(idTeam);
+        if (mittente == null) {
+            throw new ResourceNotFoundException("Mittente non trovato con ID: " + idMittente);
+        }
+        if (destinatario == null) {
+            throw new ResourceNotFoundException("Destinatario non trovato con ID: " + idDestinatario);
+        }
+        if (team == null) {
+            throw new ResourceNotFoundException("Team non trovato con ID: " + idTeam);
+        }
         Invito invito = new Invito(team,destinatario, mittente);
         return invitoRepository.save(invito);
     }
@@ -38,6 +48,9 @@ public class InvitoService {
 
     public Invito rifiutaInvito(Long idInvito) {
         Invito invito = invitoRepository.getInvitoById(idInvito);
+        if (invito == null) {
+            throw new ResourceNotFoundException("Invito non trovato con ID: " + idInvito);
+        }
         invitoRepository.delete(invito);
         return invito;
     }
@@ -45,7 +58,13 @@ public class InvitoService {
 
     public Team accettaInvito(Long idInvito) {
         Invito invito = invitoRepository.getInvitoById(idInvito);
+        if (invito == null) {
+            throw new ResourceNotFoundException("Invito non trovato con ID: " + idInvito);
+        }
         Team team = teamRepository.getTeamById(invito.getTeam().getId());
+        if (team == null) {
+            throw new ResourceNotFoundException("Team non trovato con ID: " + invito.getTeam().getId());
+        }
         team.getPartecipanti().add(invito.getDestinatario());
         invitoRepository.delete(invito);
         return teamRepository.save(team);
@@ -57,6 +76,9 @@ public class InvitoService {
 
     public List<Invito> getPropriInviti(Long idUtente){
         Utente utente= utenteRepository.getUtenteById(idUtente);
+        if (utente == null) {
+            throw new ResourceNotFoundException("Utente non trovato con ID: " + idUtente);
+        }
         return invitoRepository.getAllInvitoByMittente(utente);
     }
 

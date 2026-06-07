@@ -5,6 +5,7 @@ import it.unicam.cs.ids.hackhub.model.Sottomissione;
 import it.unicam.cs.ids.hackhub.model.Valutazione;
 import it.unicam.cs.ids.hackhub.service.SottomissioneService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class SottomissioneController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SottomissioneResponseDTO>> visualizzaSottomissioni(){
+    public ResponseEntity<List<SottomissioneResponseDTO>> visualizzaSottomissioni() {
         List<Sottomissione> sottomissioniList = sottomissioneService.getAllSottomissione();
 
         List<SottomissioneResponseDTO> response = sottomissioniList.stream()
@@ -32,44 +33,25 @@ public class SottomissioneController {
     }
 
     @PostMapping("/invia")
-    public ResponseEntity<String> inviaSottomissione(@RequestBody SottomissioneDTO sottomissioneDTO){
-        try {
-            sottomissioneService.createSottomissione(sottomissioneDTO);
-            return ResponseEntity.status(201).body("Sottomissione inviata con successo per il team selezionato!");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nell'invio: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(400).body("Impossibile inviare: " + e.getMessage());
-        }
+    public ResponseEntity<String> inviaSottomissione(@RequestBody SottomissioneDTO sottomissioneDTO) {
+        sottomissioneService.createSottomissione(sottomissioneDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Sottomissione inviata con successo per il team selezionato!");
     }
 
-
     @PutMapping("/aggiorna/{idSottomissione}")
-    public ResponseEntity<String> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO){
-        try {
-            sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
-            return ResponseEntity.ok("Sottomissione con ID " + idSottomissione + " aggiornata correttamente.");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nell'aggiornamento: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(400).body("Impossibile modificare il progetto: " + e.getMessage());
-        }
+    public ResponseEntity<String> aggiornaSottomissione(@PathVariable Long idSottomissione, @RequestBody SottomissioneDTO sottomissioneDTO) {
+        sottomissioneService.aggiornaSottomissione(idSottomissione, sottomissioneDTO);
+        return ResponseEntity.ok("Sottomissione con ID " + idSottomissione + " aggiornata correttamente.");
     }
 
     @PostMapping("/valuta/{idGiudice}")
-    public ResponseEntity<String> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO){
-        try {
-            sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO);
-            return ResponseEntity.status(201).body("Valutazione registrata con successo dal giudice con ID " + idGiudice + ".");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("Errore nella valutazione: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(400).body("Impossibile valutare: " + e.getMessage());
-        }
+    public ResponseEntity<String> valutaSottomissione(@PathVariable Long idGiudice, @RequestBody ValutazioneDTO valutazioneDTO) {
+        sottomissioneService.valutaSottomissione(idGiudice, valutazioneDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Valutazione registrata con successo dal giudice con ID " + idGiudice + ".");
     }
 
     @GetMapping("/valutazioni")
-    public ResponseEntity<List<AllValutazioniDTO>> getAllValutazioni(){
+    public ResponseEntity<List<AllValutazioniDTO>> getAllValutazioni() {
         List<Valutazione> valutazioni = sottomissioneService.getAllValutazioni();
 
         return ResponseEntity.ok(valutazioni.stream()
@@ -78,9 +60,8 @@ public class SottomissioneController {
     }
 
     @GetMapping("sottomissioneTeam/{idTeam}")
-    public ResponseEntity<SottomissioneResponseDTO>  getSottomissioneTeam(@PathVariable Long idTeam){
+    public ResponseEntity<SottomissioneResponseDTO> getSottomissioneTeam(@PathVariable Long idTeam) {
         Sottomissione sottomissione = sottomissioneService.getSottomissioneOfTeam(idTeam);
         return ResponseEntity.ok(SottomissioneResponseDTO.fromSottomissione(sottomissione));
     }
-
 }

@@ -1,6 +1,8 @@
 package it.unicam.cs.ids.hackhub.service;
 
 import it.unicam.cs.ids.hackhub.controller.DTO.LoginDTO;
+import it.unicam.cs.ids.hackhub.exception.AuthenticationException;
+import it.unicam.cs.ids.hackhub.exception.ResourceNotFoundException;
 import it.unicam.cs.ids.hackhub.model.Utente;
 import it.unicam.cs.ids.hackhub.repository.UtenteRepository;
 import org.jspecify.annotations.Nullable;
@@ -29,12 +31,12 @@ public class UtenteService {
         return utenteRepository.findAll();
     }
 
-    public boolean deleteUtente(Long id){
+    public void deleteUtente(Long id){
         if (utenteRepository.existsById(id)) {
             utenteRepository.deleteById(id);
-            return true;
+            return;
         }
-        return false;
+        throw new ResourceNotFoundException("Utente non trovato con ID: " + id);
     }
 
     public Utente login(LoginDTO loginDTO){
@@ -44,6 +46,6 @@ public class UtenteService {
             return utente;
         }
 
-        throw new IllegalArgumentException("Credenziali non valide: email o password errate.");
+        throw new AuthenticationException("Credenziali non valide: email o password errate.");
     }
 }
